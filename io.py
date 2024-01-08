@@ -1,5 +1,4 @@
 def hex_to_decimal(hex_number):
-    """将十六进制数（以'0x'开头）转换为十进制数"""
     decimal_number = 0
     hex_digits = '0123456789ABCDEF'
     for power, digit in enumerate(hex_number[2:].upper()[::-1]):
@@ -42,3 +41,5 @@ def convert_to_binary_list(number, length=8):
         binary_list[0] = 1
 
     return binary_list
+
+print(convert_to_binary_list("100"))
