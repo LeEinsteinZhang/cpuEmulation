@@ -1,3 +1,9 @@
+def addr_converter(addr):
+    addr_dec = 0
+    for i in range(8):
+        addr_dec += addr[7 - i] * 2 ** i
+    return addr_dec
+
 class Byte:
     def __init__(self):
         self.data = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -12,8 +18,17 @@ class Byte:
     def read(self):
         return self.data
 
+    def __repr__(self):
+        return str(self.data)
+
 
 class Memory:
     def __init__(self):
         self.size = 4 * 1024 # 4KB memory [0x000 to 0xFFF]
         self.cells = [Byte() for i in range(self.size)]
+
+    def io(self, mode, addr, data=[0,0,0,0,0,0,0,0]):
+        if mode == 1:
+            addr_dec = addr_converter(addr)
+            self.cells[addr_dec].write(data)
+        else:
