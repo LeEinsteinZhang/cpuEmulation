@@ -42,4 +42,4 @@ def convert_to_binary_list(number, length=8):
 
     return binary_list
 
-print(convert_to_binary_list("100"))
+print(hex_to_decimal("0xFFF"))
