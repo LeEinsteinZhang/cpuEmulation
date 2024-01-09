@@ -28,7 +28,8 @@ class Memory:
         self.cells = [Byte() for i in range(self.size)]
 
     def io(self, mode, addr, data=[0,0,0,0,0,0,0,0]):
+        addr_dec = addr_converter(addr)
         if mode == 1:
-            addr_dec = addr_converter(addr)
             self.cells[addr_dec].write(data)
         else:
+            return  self.cells[addr_dec].read()
