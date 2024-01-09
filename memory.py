@@ -1,7 +1,7 @@
 def addr_converter(addr):
     addr_dec = 0
     for i in range(8):
-        addr_dec += addr[7 - i] * 2 ** i
+        addr_dec += addr[15 - i] * 2 ** i
     return addr_dec
 
 class Byte:
@@ -24,7 +24,7 @@ class Byte:
 
 class Memory:
     def __init__(self):
-        self.size = 4 * 1024 # 4KB memory [0x000 to 0xFFF]
+        self.size = 64 * 1024 # 64KB memory [0x0000 to 0xFFFF] 16 bit address
         self.cells = [Byte() for i in range(self.size)]
 
     def io(self, mode, addr, data=[0,0,0,0,0,0,0,0]):
