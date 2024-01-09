@@ -17,8 +17,3 @@ class Memory:
     def __init__(self):
         self.size = 4 * 1024 # 4KB memory [0x000 to 0xFFF]
         self.cells = [Byte() for i in range(self.size)]
-
-
-M = Memory()
-for i in range(4 * 1024):
-    print(M.cells[i].data)
