@@ -1,7 +1,8 @@
 # 8-bit CPU 8080 like
 
 class CPU:
-    def __init__(self) -> None:
+    def __init__(self, memory) -> None:
+        self.mem = memory
         self.reg = {
             'A': [0, 0, 0, 0, 0, 0, 0, 0],
             'B': [0, 0, 0, 0, 0, 0, 0, 0], 
@@ -20,7 +21,7 @@ class CPU:
         self.reg[D] = self.reg[S]
 
 
-c1 = CPU()
+c1 = CPU(1)
 c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]
 c1.mov('A', 'B')
 print(c1.reg['B'])
