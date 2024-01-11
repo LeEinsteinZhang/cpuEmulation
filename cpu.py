@@ -235,7 +235,22 @@ class CPU:
         pass
 
 
-c1 = CPU(1)
-c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]
-c1.mov('A', 'B')
+c1 = CPU() # initial
+c1.mem.cells[32].write([1, 0, 1, 1, 0, 0, 1, 1])              # set 32 cells
+address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]    # pre define a address use 16-bit list
+address_31 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1] # pre define a address use 16-bit list
+c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]                        # set reg A value
+
+c1.mov('B', 'A')
+c1.lda(address)
+
 print(c1.reg['B'])
+print(c1.reg['A'])
+
+c1.reg['A'] = [1, 0, 0, 0, 0, 0, 0, 0]
+
+print(c1.reg['A'])
+
+c1.sta(address_31)
+
+print(c1.mem.cells[31].read())
