@@ -4,8 +4,8 @@ from memory import *
 # S   = Source register (8 bit)
 # RP  = Register pair (16 bit)
 # I   = 8 or 16 bit immediate operand
-# a   = 16 bit Memory address
-# p   = 8 bit port address
+# addr   = 16 bit Memory address
+# port   = 8 bit port address
 # ccc = Conditional
 
 # 8-bit CPU 8080 like
@@ -96,25 +96,25 @@ class CPU:
     def add(self, S):
         pass
 
-    def adi(self, value):
+    def adi(self, I):
         pass
 
     def adc(self, S):
         pass
 
-    def aci(self, value):
+    def aci(self, I):
         pass
 
     def sub(self, S):
         pass
 
-    def sui(self, value):
+    def sui(self, I):
         pass
 
     def sbb(self, S):
         pass
 
-    def sbi(self, value):
+    def sbi(self, I):
         pass
 
     def inr(self, D):
@@ -138,25 +138,25 @@ class CPU:
     def ana(self, S):
         pass
 
-    def ani(self, value):
+    def ani(self, I):
         pass
 
     def ora(self, S):
         pass
 
-    def ori(self, value):
+    def ori(self, I):
         pass
 
     def xra(self, S):
         pass
 
-    def xri(self, value):
+    def xri(self, I):
         pass
 
     def cmp(self, S):
         pass
 
-    def cpi(self, value):
+    def cpi(self, I):
         pass
 
     def rlc(self):
@@ -216,10 +216,10 @@ class CPU:
     def sphl(self):
         pass
 
-    def in_(self, p):
+    def in_(self, port):
         pass
 
-    def out(self, p):
+    def out(self, port):
         pass
 
     def ei(self):
