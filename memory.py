@@ -29,7 +29,6 @@ class Memory:
 
     def io(self, rw, addr, rp=0, data_1=[0,0,0,0,0,0,0,0], data_2=[0,0,0,0,0,0,0,0]):
         addr_dec = addr_converter(addr)
-        print(addr_dec)
         if rw == 1:
             if rp == 1:
                 self.cells[addr_dec].write(data_1)

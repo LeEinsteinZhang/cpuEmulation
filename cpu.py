@@ -264,18 +264,14 @@ c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]                        # set reg A value
 c1.mov('B', 'A')
 c1.lda(address)
 
-print(c1.reg['B'])
-print(c1.reg['A'])
+print(c1.reg['B'] == [0, 0, 0, 0, 0, 0, 0, 1])
+print(c1.reg['A'] == [1, 0, 1, 1, 0, 0, 1, 1])
 
 c1.reg['A'] = [1, 0, 0, 0, 0, 0, 0, 0]
-
-print(c1.reg['A'])
-
 c1.sta(address_31)
-
-print(c1.mem.cells[31].read())
+print(c1.mem.cells[31].read() == [1, 0, 0, 0, 0, 0, 0, 0])
 
 c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]
 c1.reg['B'] = [0, 0, 0, 0, 0, 0, 0, 1]
 c1.add('B')
-print(c1.reg['A'])
+print(c1.reg['A'] == [0, 0, 0, 0, 0, 0, 1, 0])
