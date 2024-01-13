@@ -94,7 +94,21 @@ class CPU:
         self.reg['L'] = val1
 
     def add(self, S):
-        pass
+        val_A = self.reg['A']
+        val_S = self.reg[S]
+        result = []
+        carry = 0
+        for i in range(8):
+            bit1 = val_A[-(i+1)] if i < len(val_A) else 0
+            bit2 = val_S[-(i+1)] if i < len(val_S) else 0
+            total = bit1 + bit2 + carry
+            result_bit = total % 2
+            carry = total // 2
+            result.insert(0, result_bit)
+        if carry != 0:
+            result.insert(0, carry)
+        
+        self.reg['A'] = result
 
     def adi(self, I):
         pass
@@ -254,3 +268,8 @@ print(c1.reg['A'])
 c1.sta(address_31)
 
 print(c1.mem.cells[31].read())
+
+c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]
+c1.reg['B'] = [0, 0, 0, 0, 0, 0, 0, 1]
+c1.add('B')
+print(c1.reg['A'])
