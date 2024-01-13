@@ -69,15 +69,19 @@ class CPU:
 
     def lda(self, addr):
         self.reg['A'] = self.mem.io(0, addr, 0)
+        return EXIT_SUCESS
 
     def sta(self, addr):
         self.mem.io(1, addr, 0, self.reg['A'])
+        return EXIT_SUCESS
 
     def lhld(self, addr):
         self.reg['H'], self.reg['L'] = self.mem.io(0, addr, 1)
+        return EXIT_SUCESS
 
     def shld(self, addr):
         self.mem.io(1, addr, 1, self.reg['H'], self.reg['L'])
+        return EXIT_SUCESS
 
     def ldax(self, RP):
         pass
@@ -92,6 +96,7 @@ class CPU:
         val1 = self.reg['E']
         self.reg['E'] = self.reg['L']
         self.reg['L'] = val1
+        return EXIT_SUCESS
 
     def add(self, S):
         val_A = self.reg['A']
@@ -109,6 +114,7 @@ class CPU:
             result.insert(0, carry)
         
         self.reg['A'] = result
+        return EXIT_SUCESS
 
     def adi(self, I):
         pass
