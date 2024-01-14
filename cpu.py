@@ -276,3 +276,5 @@ c1.reg['B'] = [0, 0, 0, 0, 0, 0, 0, 1]
 c1.add('B')
 print(c1.reg['A'] == [0, 0, 0, 0, 0, 0, 1, 0])
 #test
+
+#add more instruction tests below
