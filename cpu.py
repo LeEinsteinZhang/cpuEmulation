@@ -16,127 +16,213 @@ EXIT_ERROR = -1
 
 class CPU:
     def __init__(self) -> None:
+        self.port = [0] * 40
         self.mem = Memory()
-        self.reg = {
-            'A': [0, 0, 0, 0, 0, 0, 0, 0],
-            'B': [0, 0, 0, 0, 0, 0, 0, 0], 
-            'C': [0, 0, 0, 0, 0, 0, 0, 0],
-            'D': [0, 0, 0, 0, 0, 0, 0, 0],
-            'E': [0, 0, 0, 0, 0, 0, 0, 0], 
-            'H': [0, 0, 0, 0, 0, 0, 0, 0],
-            'L': [0, 0, 0, 0, 0, 0, 0, 0],
-        }
-        self.sp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        self.pc = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        self.flags = {'S': 0,
-                      'Z': 0,
-                      'AC': 0,
-                      'P': 0,
-                      'C': 0}
-    
+        self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 0
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 1
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 2
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 3
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 4
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 5
+                #    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^
+                #    00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15
+                    ]
+
+    def reg_reader(self, num, start, end):
+        result = []
+        for i in range(start, end + 1):
+            result.append(self.reg[num][i])
+        return result
+
+    def reg_writer(self, num, start, end, data):
+        data_size = len(data)
+        dest_size = end - start + 1
+        if data_size > dest_size:
+            return EXIT_ERROR
+        else:
+            for i in range(dest_size):
+                if i < data_size:
+                    self.reg[num][start + i] = data[i]
+                else:
+                    self.reg[num][start + i] = 0
+            return EXIT_SUCESS
+
+    def reg_r(self, reg):
+        if reg == 'A':
+            return self.reg_reader(0,8,15)
+        elif reg == 'F':
+            return self.reg_reader(0, 0, 7)
+        elif reg == 'B':
+            return self.reg_reader(1,8,15)
+        elif reg == 'C':
+            return self.reg_reader(1,0,7)
+        elif reg == 'D':
+            return self.reg_reader(2,8,15)
+        elif reg == 'E':
+            return self.reg_reader(2,0,7)
+        elif reg == 'H':
+            return self.reg_reader(3,8,15)
+        elif reg == 'L':
+            return self.reg_reader(3,0,7)
+        elif reg == 'BC':
+            return self.reg_reader(1,0,15)
+        elif reg == 'DE':
+            return self.reg_reader(2,0,15)
+        elif reg == 'HL' or reg == 'M':
+            return self.reg_reader(3,0,15)
+        elif reg == 'SP':
+            return self.reg_reader(4,0,15)
+        elif reg == 'PC':
+            return self.reg_reader(5,0,15)
+        else:
+            return EXIT_ERROR
+
+    def reg_w(self, reg, data):
+        if reg == 'A':
+            self.reg_writer(0,8,15,data)
+        elif reg == 'F':
+            self.reg_writer(0, 0, 7,data)
+        elif reg == 'B':
+            self.reg_writer(1,8,15,data)
+        elif reg == 'C':
+            self.reg_writer(1,0,7,data)
+        elif reg == 'D':
+            self.reg_writer(2,8,15,data)
+        elif reg == 'E':
+            self.reg_writer(2,0,7,data)
+        elif reg == 'H':
+            self.reg_writer(3,8,15,data)
+        elif reg == 'L':
+            self.reg_writer(3,0,7,data)
+        elif reg == 'BC':
+            self.reg_writer(1,0,15,data)
+        elif reg == 'DE':
+            self.reg_writer(2,0,15,data)
+        elif reg == 'HL' or reg == 'M':
+            self.reg_writer(3,0,15,data)
+        elif reg == 'SP':
+            self.reg_writer(4,0,15,data)
+        elif reg == 'PC':
+            self.reg_writer(5,0,15,data)
+        else:
+            return EXIT_ERROR
+
+    def set_C(self):
+        self.reg[0][0] = 1
+
+    def get_C(self):
+        return self.reg[0][0]
+
+    def set_P(self):
+        self.reg[0][2] = 1
+
+    def get_P(self):
+        return self.reg[0][2]
+    def set_A(self):
+        self.reg[0][4] = 1
+
+    def get_A(self):
+        return self.reg[0][4]
+
+    def set_Z(self):
+        self.reg[0][6] = 1
+
+    def get_Z(self):
+        return self.reg[0][6]
+    def set_S(self):
+        self.reg[0][7] = 1
+
+    def get_S(self):
+        return self.reg[0][7]
+
     def int_to_bits_8b(self, value):
-        return [int(bit) for bit in '{:08b}'.format(value)]
-    
+        if value < 0:
+            self.reset_flags()
+            self.set_S()
+        return [int(bit) for bit in '{:08b}'.format(value & 0xFF)]
+
     def int_to_bits_16b(self, value):
-        ans = [int(bit) for bit in '{:16b}'.format(value)]
-        return ans[:8], ans[8:], ans
+        if value < 0:
+            self.set_S()
+        return [int(bit) for bit in '{:016b}'.format(value & 0xFFFF)]
+
+    def reset_flags(self):
+        self.reg[0][0] = 0
+        self.reg[0][2] = 0
+        self.reg[0][4] = 0
+        self.reg[0][6] = 0
+        self.reg[0][7] = 0
 
     def bits_to_int(self, bits):
         return int(''.join(str(bit) for bit in bits), 2)
 
+    def adder(self, v1, v2):
+        size = len(v1)
+        result = []
+        carry = 0
+        for i in range(size):
+            bit1 = v1[-(i + 1)] if i < size else 0
+            bit2 = v2[-(i + 1)] if i < size else 0
+            total = bit1 + bit2 + carry
+            result_bit = total % 2
+            carry = total // 2
+            result.insert(0, result_bit)
+        if carry != 0:
+            result.insert(0, carry)
+        return result
+
     def mov(self, D, S):
-        self.reg[D] = self.reg[S]
+        self.reg_w(D, self.reg_r(S))
         return EXIT_SUCESS
-    
+
     def mvi(self, D, I):
-        val = self.int_to_bits_8b(I)
-        self.reg[D] = val
+        self.reg_w(D, I)
         return EXIT_SUCESS
-        
+
     def lxi(self, RP, I):
-        val1, val2, two_bytes = self.int_to_bits_16b(I)
-        if RP == 'BC':
-            self.reg['B'] = val1
-            self.reg['C'] = val2
-            return EXIT_SUCESS
-        elif RP == 'DE':
-            self.reg['D'] = val1
-            self.reg['E'] = val2
-            return EXIT_SUCESS
-        elif RP == 'HL':
-            self.reg['H'] = val1
-            self.reg['L'] = val2
-            return EXIT_SUCESS
-        else:
-            return EXIT_FAIL
+        self.reg_w(RP, I)
 
     def lda(self, addr):
-        self.reg['A'] = self.mem.io(0, addr, 0)
+        self.reg_w('A', self.mem.io(0, addr))
         return EXIT_SUCESS
 
     def sta(self, addr):
-        self.mem.io(1, addr, 0, self.reg['A'])
+        self.mem.io(1, addr, self.reg_r('A'))
         return EXIT_SUCESS
 
     def lhld(self, addr):
-        self.reg['H'], self.reg['L'] = self.mem.io(0, addr, 1)
-        return EXIT_SUCESS
+        addr_1 = self.adder(addr, self.int_to_bits_16b(1))
+        self.reg_w('HL', self.mem.io(0,addr) + self.mem.io(0,addr_1))
 
     def shld(self, addr):
-        self.mem.io(1, addr, 1, self.reg['H'], self.reg['L'])
-        return EXIT_SUCESS
+        addr_1 = self.adder(addr, self.int_to_bits_16b(1))
+        self.mem.io(1, addr, self.reg_r('HL')[:8])
+        self.mem.io(1, addr_1, self.reg_r('HL')[8:])
 
     def ldax(self, RP):
-        pass
+        addr = self.reg_r(RP)
+        self.lda(addr)
 
     def stax(self, RP):
-        pass
+        addr = self.reg_r(RP)
+        self.sta(addr)
 
     def xchg(self):
-        val1 = self.reg['D']
-        self.reg['D'] = self.reg['H']
-        self.reg['H'] = val1
-        val1 = self.reg['E']
-        self.reg['E'] = self.reg['L']
-        self.reg['L'] = val1
-        return EXIT_SUCESS
+        for i in range(16):
+            self.reg[2][i] = self.reg[2][i] ^ self.reg[3][i]
+            self.reg[3][i] = self.reg[2][i] ^ self.reg[3][i]
+            self.reg[2][i] = self.reg[2][i] ^ self.reg[3][i]
 
     def add(self, S):
-
-        val_A = self.reg['A']
-        val_S = self.reg[S]
-        result = []
-        carry = 0
-        for i in range(8):
-            bit1 = val_A[-(i+1)] if i < 8 else 0
-            bit2 = val_S[-(i+1)] if i < 8 else 0
-            total = bit1 + bit2 + carry
-            result_bit = total % 2
-            carry = total // 2
-            result.insert(0, result_bit)
-        if carry != 0:
-            result.insert(0, carry)
-        
-        self.reg['A'] = result
+        val = self.reg_r(S)
+        val_A = self.reg_r('A')
+        self.reg_w('A', self.adder(val, val_A))
         return EXIT_SUCESS
 
     def adi(self, I):
-
         val = self.int_to_bits_8b(I)
-        val_A = self.reg['A']
-        result = []
-        carry = 0
-        for i in range(8):
-            bit1 = val_A[-(i+1)] if i < 8 else 0
-            bit2 = val[-(i+1)] if i < 8 else 0
-            total = bit1 + bit2 + carry
-            result_bit = total % 2
-            carry = total // 2
-            result.insert(0, result_bit)
-        if carry != 0:
-            result.insert(0, carry)
-        
-        self.reg['A'] = result
+        val_A = self.reg_r('A')
+        self.reg_w('A', self.adder(val, val_A))
         return EXIT_SUCESS
 
     def adc(self, S):
@@ -273,33 +359,3 @@ class CPU:
 
     def nop(self):
         pass
-
-
-c1 = CPU() # initial
-c1.mem.cells[32].write([1, 0, 1, 1, 0, 0, 1, 1])              # set 32 cells
-address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]    # pre define a address use 16-bit list
-address_31 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1] # pre define a address use 16-bit list
-c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]                        # set reg A value
-
-#mov lda test
-c1.mov('B', 'A')
-c1.lda(address)
-
-print(c1.reg['B'] == [0, 0, 0, 0, 0, 0, 0, 1])
-print(c1.reg['A'] == [1, 0, 1, 1, 0, 0, 1, 1])
-
-#sta test
-c1.reg['A'] = [1, 0, 0, 0, 0, 0, 0, 0]
-c1.sta(address_31)
-print(c1.mem.cells[31].read() == [1, 0, 0, 0, 0, 0, 0, 0])
-
-#add test
-c1.reg['A'] = c1.int_to_bits_8b(1)
-c1.reg['B'] = c1.int_to_bits_8b(1)
-c1.add('B')
-print(c1.reg['A'] == c1.int_to_bits_8b(2))
-
-#adi test
-c1.adi(16)
-print(c1.reg['A'] == c1.int_to_bits_8b(18))
-
