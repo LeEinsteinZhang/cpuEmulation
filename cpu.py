@@ -281,20 +281,25 @@ address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]    # pre define a add
 address_31 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1] # pre define a address use 16-bit list
 c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]                        # set reg A value
 
+#mov lda test
 c1.mov('B', 'A')
 c1.lda(address)
 
 print(c1.reg['B'] == [0, 0, 0, 0, 0, 0, 0, 1])
 print(c1.reg['A'] == [1, 0, 1, 1, 0, 0, 1, 1])
 
+#sta test
 c1.reg['A'] = [1, 0, 0, 0, 0, 0, 0, 0]
 c1.sta(address_31)
 print(c1.mem.cells[31].read() == [1, 0, 0, 0, 0, 0, 0, 0])
 
-c1.reg['A'] = [0, 0, 0, 0, 0, 0, 0, 1]
-c1.reg['B'] = [0, 0, 0, 0, 0, 0, 0, 1]
+#add test
+c1.reg['A'] = c1.int_to_bits_8b(1)
+c1.reg['B'] = c1.int_to_bits_8b(1)
 c1.add('B')
-print(c1.reg['A'] == [0, 0, 0, 0, 0, 0, 1, 0])
-#test
+print(c1.reg['A'] == c1.int_to_bits_8b(2))
 
-#add more instruction tests below
+#adi test
+c1.adi(16)
+print(c1.reg['A'] == c1.int_to_bits_8b(18))
+
