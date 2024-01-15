@@ -25,11 +25,14 @@ class CPU:
             'E': [0, 0, 0, 0, 0, 0, 0, 0], 
             'H': [0, 0, 0, 0, 0, 0, 0, 0],
             'L': [0, 0, 0, 0, 0, 0, 0, 0],
-            'Flags': [0, 0, 0, 0, 0, 0, 0, 0]
         }
         self.sp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.pc = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        self.flags = [0, 0, 0, 0, 0, 0, 0, 0]
+        self.flags = {'S': 0,
+                      'Z': 0,
+                      'AC': 0,
+                      'P': 0,
+                      'C': 0}
     
     def int_to_bits_8b(self, value):
         return [int(bit) for bit in '{:08b}'.format(value)]
@@ -99,13 +102,14 @@ class CPU:
         return EXIT_SUCESS
 
     def add(self, S):
+
         val_A = self.reg['A']
         val_S = self.reg[S]
         result = []
         carry = 0
         for i in range(8):
-            bit1 = val_A[-(i+1)] if i < len(val_A) else 0
-            bit2 = val_S[-(i+1)] if i < len(val_S) else 0
+            bit1 = val_A[-(i+1)] if i < 8 else 0
+            bit2 = val_S[-(i+1)] if i < 8 else 0
             total = bit1 + bit2 + carry
             result_bit = total % 2
             carry = total // 2
@@ -117,7 +121,23 @@ class CPU:
         return EXIT_SUCESS
 
     def adi(self, I):
-        pass
+
+        val = self.int_to_bits_8b(I)
+        val_A = self.reg['A']
+        result = []
+        carry = 0
+        for i in range(8):
+            bit1 = val_A[-(i+1)] if i < 8 else 0
+            bit2 = val[-(i+1)] if i < 8 else 0
+            total = bit1 + bit2 + carry
+            result_bit = total % 2
+            carry = total // 2
+            result.insert(0, result_bit)
+        if carry != 0:
+            result.insert(0, carry)
+        
+        self.reg['A'] = result
+        return EXIT_SUCESS
 
     def adc(self, S):
         pass
