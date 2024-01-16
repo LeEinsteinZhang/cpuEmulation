@@ -25,7 +25,7 @@ c1.add('B')
 print(c1.reg_r('A') == c1.int_to_bits_8b(2))
 
 #adi test
-c1.adi(16)
+c1.adi(c1.int_to_bits_8b(16))
 print(c1.reg_r('A') == c1.int_to_bits_8b(18))
 
 #lhld shld

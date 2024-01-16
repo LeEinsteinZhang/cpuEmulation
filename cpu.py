@@ -231,9 +231,8 @@ class CPU:
         return EXIT_SUCESS
 
     def adi(self, I):
-        val = self.int_to_bits_8b(I)
         val_A = self.reg_r('A')
-        self.reg_w('A', self.adder(val, val_A))
+        self.reg_w('A', self.adder(val_A, I))
         return EXIT_SUCESS
 
     def adc(self, S):
@@ -273,29 +272,34 @@ class CPU:
         self.reg_w(RP, self.subtractor(self.reg_r(RP), self.int_to_bits_16b(1)))
 
     def dad(self, RP):
-        pass
+        self.reg_w('HL', self.adder(self.reg_r('HL'), self.reg_r(RP)))
 
     def daa(self):
         pass
 
     def ana(self, S):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] and self.reg_r(S)[i]
 
     def ani(self, I):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] and I[i]
 
     def ora(self, S):
         for i in range(8):
             self.reg[0][8+i] = self.reg[0][8+i] or self.reg_r(S)[i]
 
     def ori(self, I):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] or I[i]
 
     def xra(self, S):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] ^ self.reg_r(S)[i]
 
     def xri(self, I):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] ^ I[i]
 
     def cmp(self, S):
         pass
@@ -316,13 +320,13 @@ class CPU:
         pass
 
     def cma(self):
-        pass
+        self.reg_w('A', [1 if bit == 0 else 0 for bit in self.reg_r('A')])
 
     def cmc(self):
-        pass
+        self.reg[0][0] = not self.reg[0][0]
 
     def stc(self):
-        pass
+        self.set_C()
 
     def jmp(self, addr):
         pass
