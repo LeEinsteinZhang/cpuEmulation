@@ -63,3 +63,5 @@ old_hl = c1.reg_r('HL')
 c1.xchg()
 print(c1.reg_r('DE') == old_hl)
 print(c1.reg_r('HL') == old_de)
+
+# commit TEST
