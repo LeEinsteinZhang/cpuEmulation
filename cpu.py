@@ -18,12 +18,12 @@ class CPU:
     def __init__(self) -> None:
         self.port = [0] * 40
         self.mem = Memory()
-        self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 0
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 1
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 2
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 3
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 4
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # < 5
+        self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 2  E:[0...7] D:[8...15]   16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 3  L:[0...7] H:[8...15]   16-bits
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], # <- 4  SP:[0...15]            16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 5  PC:[0...15]            16-bits
                 #    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^
                 #    00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15
                     ]
@@ -170,6 +170,17 @@ class CPU:
         if carry != 0:
             result.insert(0, carry)
         return result
+    
+    def two_complement(self, binary_number):
+        one_complement = [1 if bit == 0 else 0 for bit in binary_number]
+        return self.adder(one_complement, [0] * (len(binary_number) - 1) + [1])
+
+    def subtractor(self, v1, v2):
+        twos_complement_v2 = self.two_complement(v2)
+        result = self.adder(v1, twos_complement_v2)
+        if len(result) > len(v1):
+            result = result[1:]
+        return result
 
     def mov(self, D, S):
         self.reg_w(D, self.reg_r(S))
@@ -232,10 +243,16 @@ class CPU:
         pass
 
     def sub(self, S):
-        pass
+        val_A = self.reg_r('A')
+        val = self.reg_r(S)
+        self.reg_w('A', self.subtractor(val_A, val))
+        return EXIT_SUCESS
 
     def sui(self, I):
-        pass
+        val = self.int_to_bits_8b(I)
+        val_A = self.reg_r('A')
+        self.reg_w('A', self.subtractor(val_A, val))
+        return EXIT_SUCESS
 
     def sbb(self, S):
         pass
@@ -244,16 +261,16 @@ class CPU:
         pass
 
     def inr(self, D):
-        pass
+        self.reg_w(D, self.adder(self.reg_r(D), self.int_to_bits_8b(1)))
 
     def dcr(self, D):
-        pass
+        self.reg_w(D, self.subtractor(self.reg_r(D), self.int_to_bits_8b(1)))
 
     def inx(self, RP):
-        pass
+        self.reg_w(RP, self.adder(self.reg_r(RP), self.int_to_bits_16b(1)))
 
     def dcx(self, RP):
-        pass
+        self.reg_w(RP, self.subtractor(self.reg_r(RP), self.int_to_bits_16b(1)))
 
     def dad(self, RP):
         pass
@@ -268,7 +285,8 @@ class CPU:
         pass
 
     def ora(self, S):
-        pass
+        for i in range(8):
+            self.reg[0][8+i] = self.reg[0][8+i] or self.reg_r(S)[i]
 
     def ori(self, I):
         pass

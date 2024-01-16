@@ -64,4 +64,84 @@ c1.xchg()
 print(c1.reg_r('DE') == old_hl)
 print(c1.reg_r('HL') == old_de)
 
-# commit TEST
+# def adc(self, S):
+    
+
+# def aci(self, I):
+    
+
+#sub test
+c1.reg_w('A', c1.int_to_bits_8b(2))
+c1.reg_w('B', c1.int_to_bits_8b(1))
+c1.sub('B')
+print(c1.reg_r('A') == c1.int_to_bits_8b(1))
+
+#sui test
+c1.reg_w('A', c1.int_to_bits_8b(129))
+c1.sui(1)
+print(c1.reg_r('A') == c1.int_to_bits_8b(128))
+
+# def sbb(self, S):
+    
+
+# def sbi(self, I):
+    
+
+# def inr(self, D):
+    
+
+# def dcr(self, D):
+    
+
+# def inx(self, RP):
+    
+
+# def dcx(self, RP):
+    
+
+# def dad(self, RP):
+    
+
+# def daa(self):
+    
+
+# def ana(self, S):
+    
+
+# def ani(self, I):
+    
+
+#ora test
+c1.reg_w('A', [1,0,1,0,1,0,1,0])
+c1.reg_w('B', [0,1,0,1,0,1,0,1])
+c1.ora('B')
+print(c1.reg_r('A') == [1,1,1,1,1,1,1,1])
+
+# def adc(self, S):
+#     pass
+
+# def aci(self, I):
+#     pass
+
+# def sub(self, S):
+#     pass
+
+# def sui(self, I):
+#     pass
+
+# def sbb(self, S):
+#     pass
+
+# def sbi(self, I):
+#     pass
+
+# def inr(self, D):
+#     pass
+
+# def dcr(self, D):
+#     pass
+
+#inx test
+c1.reg_w('DE', c1.int_to_bits_16b(1))
+c1.inx('DE')
+print(c1.reg_r('DE') == c1.int_to_bits_16b(2))
