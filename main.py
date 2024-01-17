@@ -8,25 +8,25 @@ c1.reg_w('A', [0, 0, 0, 0, 0, 0, 0, 1])                        # set reg A value
 
 #mov lda test
 c1.mov('B', 'A')
+print("mov test pass?=",(c1.reg_r('B') == [0, 0, 0, 0, 0, 0, 0, 1]))
 c1.lda(address)
 
-print(c1.reg_r('B') == [0, 0, 0, 0, 0, 0, 0, 1])
-print(c1.reg_r('A') == [1, 0, 1, 1, 0, 0, 1, 1])
+print("lda test pass?=",c1.reg_r('A') == [1, 0, 1, 1, 0, 0, 1, 1])
 
 #sta test
 c1.reg_w('A', [1, 0, 0, 0, 0, 0, 0, 0])
 c1.sta(address_31)
-print(c1.mem.cells[31].read() == [1, 0, 0, 0, 0, 0, 0, 0])
+print("sta test pass?=",c1.mem.cells[31].read() == [1, 0, 0, 0, 0, 0, 0, 0])
 
 #add test
 c1.reg_w('A', c1.int_to_bits_8b(1))
 c1.reg_w('B', c1.int_to_bits_8b(1))
 c1.add('B')
-print(c1.reg_r('A') == c1.int_to_bits_8b(2))
+print("add test pass?=",c1.reg_r('A') == c1.int_to_bits_8b(2))
 
 #adi test
 c1.adi(c1.int_to_bits_8b(16))
-print(c1.reg_r('A') == c1.int_to_bits_8b(18))
+print("adi test pass?=",c1.reg_r('A') == c1.int_to_bits_8b(18))
 
 #lhld shld
 address_128 = c1.int_to_bits_16b(128)
@@ -41,28 +41,26 @@ c1.mem.io(1, address_128, [0, 0, 0, 0, 0, 0, 0, 1])
 c1.mem.io(1, address_129, val_255)
 
 c1.lhld(address_128)
-print(c1.reg_r('HL') == c1.int_to_bits_16b(511))
+print("lhld test pass?=",c1.reg_r('HL') == c1.int_to_bits_16b(511))
 c1.shld(address_256)
-print(c1.mem.cells[256].read() == c1.mem.cells[128].read())
-print(c1.mem.cells[257].read() == c1.mem.cells[129].read())
+print("shld test pass?=",(c1.mem.cells[256].read() == c1.mem.cells[128].read()) and (c1.mem.cells[257].read() == c1.mem.cells[129].read()))
 
 #ldax test
 c1.reg_w('BC', address_256)
 c1.ldax('BC')
-print(c1.reg_r('A') == c1.mem.cells[256].read())
+print("ldax test pass?=",c1.reg_r('A') == c1.mem.cells[256].read())
 
 #sdax test
 address_512 = c1.int_to_bits_16b(512)
 c1.reg_w('DE', address_512)
 c1.stax('DE')
-print(c1.reg_r('A') == c1.mem.cells[512].read())
+print("sdax test pass?=",c1.reg_r('A') == c1.mem.cells[512].read())
 
 #xchg test
 old_de = c1.reg_r('DE')
 old_hl = c1.reg_r('HL')
 c1.xchg()
-print(c1.reg_r('DE') == old_hl)
-print(c1.reg_r('HL') == old_de)
+print("xchg test pass?=",(c1.reg_r('DE') == old_hl) and (c1.reg_r('HL') == old_de))
 
 # def adc(self, S):
     
@@ -74,12 +72,12 @@ print(c1.reg_r('HL') == old_de)
 c1.reg_w('A', c1.int_to_bits_8b(2))
 c1.reg_w('B', c1.int_to_bits_8b(1))
 c1.sub('B')
-print(c1.reg_r('A') == c1.int_to_bits_8b(1))
+print("sub test pass?=",c1.reg_r('A') == c1.int_to_bits_8b(1))
 
 #sui test
 c1.reg_w('A', c1.int_to_bits_8b(129))
 c1.sui(1)
-print(c1.reg_r('A') == c1.int_to_bits_8b(128))
+print("sui test pass?=",c1.reg_r('A') == c1.int_to_bits_8b(128))
 
 # def sbb(self, S):
     
@@ -115,7 +113,7 @@ print(c1.reg_r('A') == c1.int_to_bits_8b(128))
 c1.reg_w('A', [1,0,1,0,1,0,1,0])
 c1.reg_w('B', [0,1,0,1,0,1,0,1])
 c1.ora('B')
-print(c1.reg_r('A') == [1,1,1,1,1,1,1,1])
+print("ora test pass?=",c1.reg_r('A') == [1,1,1,1,1,1,1,1])
 
 # def adc(self, S):
 #     pass
@@ -144,11 +142,31 @@ print(c1.reg_r('A') == [1,1,1,1,1,1,1,1])
 #inx test
 c1.reg_w('DE', c1.int_to_bits_16b(1))
 c1.inx('DE')
-print(c1.reg_r('DE') == c1.int_to_bits_16b(2))
+print("inx test pass?=",c1.reg_r('DE') == c1.int_to_bits_16b(2))
+
+#dcx test
+c1.dcx('DE')
+print("dcx test pass?=",c1.reg_r('DE') == c1.int_to_bits_16b(1))
+
+#push test
+c1.reg_w('BC', c1.int_to_bits_16b(128))
+c1.push('BC')
+print("push test pass?=", c1.mem.cells[65533].read() + c1.mem.cells[65534].read() == c1.int_to_bits_16b(128))
+
+#pop test
+c1.pop('DE')
+print("pop test pass?=",c1.reg_r('DE') == c1.int_to_bits_16b(128))
+
+#xthl test
+c1.push('DE')
+old_sp_data = c1.mem.cells[65533].read() + c1.mem.cells[65534].read()
+old_hl = c1.reg_r('HL')
+c1.xthl()
+print("xthl test pass?=",(c1.mem.cells[65533].read() + c1.mem.cells[65534].read() == old_hl) and (c1.reg_r('HL') == old_sp_data))
 
 
 
-
+# asm code encoding tests
 c2 = CPU() # initial
 n_bytes = 512
 source_addr = 1024
@@ -190,14 +208,4 @@ c2.run()
 same = True
 for i in range(n_bytes):
     same = same and (c2.mem.cells[source_addr + i].read() == c2.mem.cells[target_addr + i].read())
-print(same)
-
-c2.reg_w('BC', c2.int_to_bits_16b(n_bytes))
-c2.push('BC')
-c2.pop('DE')
-print(c2.reg_r('DE') == c2.int_to_bits_16b(n_bytes))
-c2.push('DE')
-old_sp_data = c2.mem.cells[65533].read() + c2.mem.cells[65534].read()
-old_hl = c2.reg_r('HL')
-c2.xthl()
-print((c2.mem.cells[65533].read() + c2.mem.cells[65534].read() == old_hl) and (c2.reg_r('HL') == old_sp_data))
+print("memcpy asm tst pass?=",same)
