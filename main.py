@@ -150,10 +150,10 @@ print(c1.reg_r('DE') == c1.int_to_bits_16b(2))
 
 
 c2 = CPU() # initial
-n_bytes = 128
+n_bytes = 256
 source_addr = 1024
 target_addr = 2048
-for i in range(1, n_bytes + 1):
+for i in range(n_bytes):
     c2.mem.cells[source_addr + i].write(c2.int_to_bits_8b(i))
 
 #  memcpy --
@@ -169,8 +169,7 @@ for i in range(1, n_bytes + 1):
 c2.reg_w('BC', c2.int_to_bits_16b(n_bytes))
 c2.reg_w('DE', c2.int_to_bits_16b(source_addr))
 c2.reg_w('HL', c2.int_to_bits_16b(target_addr))
-c2.mem.cells[0].write([0, 0, 0, 0, 0, 0, 1, 1])    # <-|
-c2.mem.cells[1].write([1, 1, 1, 0, 1, 0, 1, 1])    # <-|-- 1003 int bits
+c2.reg_w('PC',  c2.int_to_bits_16b(1000))
 c2.mem.cells[1000].write([0, 1, 1, 1, 1, 0, 0, 0]) #       mov a,b  ;Copy register B to register A
 c2.mem.cells[1001].write([1, 0, 1, 1, 0, 0, 0, 1]) #       ora c    ;Bitwise OR of A and C into register A
 c2.mem.cells[1002].write([1, 1, 0, 0, 1, 0, 0, 0]) #       rz       ;Return if the zero-flag is set high.
@@ -183,7 +182,12 @@ c2.mem.cells[1008].write([0, 1, 1, 1, 1, 0, 0, 0]) #       mov a,b  ;Copy B to A
 c2.mem.cells[1009].write([1, 0, 1, 1, 0, 0, 0, 1]) #       ora c    ;A = A | C    (are both B and C zero?)
 c2.mem.cells[1010].write([1, 1, 0, 0, 0, 0, 1, 0]) #       jnz loop ;Jump to 'loop:' if the zero-flag is not set.
 c2.mem.cells[1011].write([0, 0, 0, 0, 0, 0, 1, 1]) # <-|
-c2.mem.cells[1012].write([1, 1, 1, 0, 1, 0, 1, 1]) # <-|-- 1003 int bits
+c2.mem.cells[1012].write([1, 1, 1, 0, 1, 0, 1, 0]) # <-|-- 1002 int bits
 c2.mem.cells[1013].write([1, 1, 0, 0, 1, 0, 0, 1]) #       ret      ;Return
 
 c2.run()
+
+same = True
+for i in range(n_bytes):
+    same = same and (c2.mem.cells[source_addr + i].read() == c2.mem.cells[target_addr + i].read())
+print(same)

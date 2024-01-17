@@ -184,7 +184,7 @@ class CPU:
 
     def mov(self, D, S):
         if D == 'M':
-            self.mem.io(1, S)
+            self.mem.io(1, self.reg_r(D), self.reg_r(S))
         else:
             self.reg_w(D, self.reg_r(S))
             return EXIT_SUCESS
@@ -291,6 +291,8 @@ class CPU:
     def ora(self, S):
         for i in range(8):
             self.reg[0][8+i] = self.reg[0][8+i] or self.reg_r(S)[i]
+        if not self.bits_to_int(self.reg_r('A')):
+            self.set_Z()
 
     def ori(self, I):
         for i in range(8):
@@ -332,7 +334,7 @@ class CPU:
         self.set_C()
 
     def jmp(self, addr):
-        pass
+        self.reg_w('PC', addr)
 
     def jccc(self, addr, ccc):
         pass
@@ -344,7 +346,7 @@ class CPU:
         pass
 
     def ret(self):
-        pass
+        return EXIT_SUCESS
 
     def rccc(self, ccc):
         pass
@@ -383,7 +385,7 @@ class CPU:
         pass
 
     def nop(self):
-        pass
+        return 0
     
     def fetch(self):
         instruction = self.mem.io(0,self.reg_r('PC'))
@@ -391,53 +393,62 @@ class CPU:
 
     def execute(self, instruction):
         if instruction == [0, 0, 0, 0, 0, 0, 0, 0]:
-            pass
-            # Execute the operation for 00000000
+            self.nop()
+
         elif instruction == [0, 0, 0, 0, 0, 0, 0, 1]:
-            pass
-            # Execute the operation for 00000001
+            self.inx('PC')
+            lb = self.mem.io(0, self.reg_r('PC'))
+            self.inx('PC')
+            hb = self.mem.io(0, self.reg_r('PC'))
+            data = lb + hb
+            self.lxi('BC', data)
+
         elif instruction == [0, 0, 0, 0, 0, 0, 1, 0]:
-            pass
-            # Execute the operation for 00000010
+            self.stax('BC')
+
         elif instruction == [0, 0, 0, 0, 0, 0, 1, 1]:
-            pass
-            # Execute the operation for 00000011
+            self.inx('BC')
+
         elif instruction == [0, 0, 0, 0, 0, 1, 0, 0]:
-            pass
-            # Execute the operation for 00000100
+            self.inr('B')
+
         elif instruction == [0, 0, 0, 0, 0, 1, 0, 1]:
-            pass
-            # Execute the operation for 00000101
+            self.dcr('B')
+
         elif instruction == [0, 0, 0, 0, 0, 1, 1, 0]:
-            pass
-            # Execute the operation for 00000110
+            self.inx('PC')
+            data = self.mem.io(0, self.reg_r('PC'))
+            self.mvi('B', data)
+
         elif instruction == [0, 0, 0, 0, 0, 1, 1, 1]:
-            pass
-            # Execute the operation for 00000111
+            self.rlc()
+
         elif instruction == [0, 0, 0, 0, 1, 0, 0, 0]:
-            pass
-            # Execute the operation for 00001000
+            self.nop()
+
         elif instruction == [0, 0, 0, 0, 1, 0, 0, 1]:
-            pass
-            # Execute the operation for 00001001
+            self.dad('BC')
+
         elif instruction == [0, 0, 0, 0, 1, 0, 1, 0]:
-            pass
-            # Execute the operation for 00001010
+            self.ldax('BC')
+
         elif instruction == [0, 0, 0, 0, 1, 0, 1, 1]:
-            pass
-            # Execute the operation for 00001011
+            self.dcx('BC')
+
         elif instruction == [0, 0, 0, 0, 1, 1, 0, 0]:
-            pass
-            # Execute the operation for 00001100
+            self.inr('C')
+
         elif instruction == [0, 0, 0, 0, 1, 1, 0, 1]:
-            pass
-            # Execute the operation for 00001101
+            self.dcr('C')
+
         elif instruction == [0, 0, 0, 0, 1, 1, 1, 0]:
-            pass
-            # Execute the operation for 00001110
+            self.inx('PC')
+            data = self.mem.io(0, self.reg_r('PC'))
+            self.mvi('C', data)
+
         elif instruction == [0, 0, 0, 0, 1, 1, 1, 1]:
-            pass
-            # Execute the operation for 00001111
+            self.rrc()
+
         elif instruction == [0, 0, 0, 1, 0, 0, 0, 0]:
             pass
             # Execute the operation for 00010000
@@ -448,8 +459,8 @@ class CPU:
             pass
             # Execute the operation for 00010010
         elif instruction == [0, 0, 0, 1, 0, 0, 1, 1]:
-            pass
-            # Execute the operation for 00010011
+            self.inx('DE')
+
         elif instruction == [0, 0, 0, 1, 0, 1, 0, 0]:
             pass
             # Execute the operation for 00010100
@@ -469,8 +480,8 @@ class CPU:
             pass
             # Execute the operation for 00011001
         elif instruction == [0, 0, 0, 1, 1, 0, 1, 0]:
-            pass
-            # Execute the operation for 00011010
+            self.ldax('DE')
+
         elif instruction == [0, 0, 0, 1, 1, 0, 1, 1]:
             pass
             # Execute the operation for 00011011
@@ -496,8 +507,8 @@ class CPU:
             pass
             # Execute the operation for 00100010
         elif instruction == [0, 0, 1, 0, 0, 0, 1, 1]:
-            pass
-            # Execute the operation for 00100011
+            self.inx('HL')
+
         elif instruction == [0, 0, 1, 0, 0, 1, 0, 0]:
             pass
             # Execute the operation for 00100100
@@ -748,11 +759,11 @@ class CPU:
             pass
             # Execute the operation for 01110110
         elif instruction == [0, 1, 1, 1, 0, 1, 1, 1]:
-            pass
-            # Execute the operation for 01110111
+            self.mov('M', 'A')
+
         elif instruction == [0, 1, 1, 1, 1, 0, 0, 0]:
-            pass
-            # Execute the operation for 01111000
+            self.mov('A', 'B')
+
         elif instruction == [0, 1, 1, 1, 1, 0, 0, 1]:
             pass
             # Execute the operation for 01111001
@@ -922,8 +933,8 @@ class CPU:
             pass
             # Execute the operation for 10110000
         elif instruction == [1, 0, 1, 1, 0, 0, 0, 1]:
-            pass
-            # Execute the operation for 10110001
+            self.ora('C')
+
         elif instruction == [1, 0, 1, 1, 0, 0, 1, 0]:
             pass
             # Execute the operation for 10110010
@@ -973,8 +984,14 @@ class CPU:
             pass
             # Execute the operation for 11000001
         elif instruction == [1, 1, 0, 0, 0, 0, 1, 0]:
-            pass
-            # Execute the operation for 11000010
+            self.inx('PC')
+            lb = self.mem.io(0, self.reg_r('PC'))
+            self.inx('PC')
+            hb = self.mem.io(0, self.reg_r('PC'))
+            addr = lb + hb
+            if not self.get_Z():
+                self.jmp(addr)
+            
         elif instruction == [1, 1, 0, 0, 0, 0, 1, 1]:
             pass
             # Execute the operation for 11000011
@@ -991,11 +1008,12 @@ class CPU:
             pass
             # Execute the operation for 11000111
         elif instruction == [1, 1, 0, 0, 1, 0, 0, 0]:
-            pass
-            # Execute the operation for 11001000
+            if self.get_Z():
+                self.ret()
+
         elif instruction == [1, 1, 0, 0, 1, 0, 0, 1]:
-            pass
-            # Execute the operation for 11001001
+            self.ret()
+
         elif instruction == [1, 1, 0, 0, 1, 0, 1, 0]:
             pass
             # Execute the operation for 11001010
@@ -1161,4 +1179,11 @@ class CPU:
         else:
             return EXIT_ERROR
 
+    def run(self):
+        while True:
+            instruction = self.fetch()
+            self.execute(instruction)
+            self.inx('PC')
+            if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
+                break
             
