@@ -1,5 +1,6 @@
 from memory import *
 
+# 8080 like cpu
 # D   = Destination register (8 bit)
 # S   = Source register (8 bit)
 # RP  = Register pair (16 bit)
