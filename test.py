@@ -1,6 +1,7 @@
 from cpu import *
+from memory import *
 
-c1 = CPU() # initial
+c1 = CPU(Memory()) # initial
 c1.mem.cells[32].write([1, 0, 1, 1, 0, 0, 1, 1])              # set 32 cells
 address = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]    # pre define a address use 16-bit list
 address_31 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1] # pre define a address use 16-bit list
@@ -167,7 +168,7 @@ print("xthl test pass?=",(c1.mem.cells[65533].read() + c1.mem.cells[65534].read(
 
 
 # asm code encoding tests
-c2 = CPU() # initial
+c2 = CPU(Memory()) # initial
 n_bytes = 512
 source_addr = 1024
 target_addr = 2048
@@ -202,7 +203,7 @@ c2.mem.cells[1010].write([1, 1, 0, 0, 0, 0, 1, 0]) #       jnz loop ;Jump to 'lo
 c2.mem.cells[1011].write([0, 0, 0, 0, 0, 0, 1, 1]) # <-|
 c2.mem.cells[1012].write([1, 1, 1, 0, 1, 0, 1, 1]) # <-|-- 1003 int bits
 c2.mem.cells[1013].write([1, 1, 0, 0, 1, 0, 0, 1]) #       ret      ;Return
-c2.mem.cells[1014].write([0, 0, 0, 0, 0, 0, 0, 0]) #       nop
+# c2.mem.cells[1014].write([0, 0, 0, 0, 0, 0, 0, 0]) #       nop
 c2.run()
 
 same = True

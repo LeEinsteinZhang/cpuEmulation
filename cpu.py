@@ -1,5 +1,3 @@
-from memory import *
-
 # 8080 like cpu
 # D   = Destination register (8 bit)
 # S   = Source register (8 bit)
@@ -19,13 +17,13 @@ HIGH = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
-    def __init__(self) -> None:
+    def __init__(self, memory=0) -> None:
         self.port = [0] * 40
-        self.mem = Memory()
+        self.mem = memory
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 2  E:[0...7] D:[8...15]   16-bits
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], # <- 3  L:[0...7] H:[8...15]   16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 3  L:[0...7] H:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 4  SP:[0...15]            16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 5  PC:[0...15]            16-bits
                 #    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^
@@ -367,7 +365,6 @@ class CPU:
         data = self.reg_r(RP)
         lb = data[:8]
         hb = data[8:]
-
         # Push higher byte and then lower byte onto the stack
         self.dcx('SP')
         self.mem.io(1, self.reg_r('SP'), hb)
@@ -421,6 +418,9 @@ class CPU:
     # BELOW IS THE CPU EXECTUTION
     #
     #################################################################################
+
+    def RESET(self):
+        pass
 
     def fetch(self):
         instruction = self.mem.io(0,self.reg_r('PC'))
@@ -584,7 +584,13 @@ class CPU:
             pass
             # Execute the operation for 00110000
         elif instruction == [0, 0, 1, 1, 0, 0, 0, 1]:
-            pass
+            self.inx('PC')
+            lb = self.mem.io(0, self.reg_r('PC'))
+            self.inx('PC')
+            hb = self.mem.io(0, self.reg_r('PC'))
+            I = lb + hb
+
+            self.lxi('SP', I)
             # Execute the operation for 00110001
         elif instruction == [0, 0, 1, 1, 0, 0, 1, 0]:
             pass
@@ -1213,6 +1219,7 @@ class CPU:
             # Execute the operation for 11111111
         else:
             return EXIT_ERROR
+        self.inx('PC')
 
     def run(self):
         while True:
@@ -1221,7 +1228,6 @@ class CPU:
                 break
             else:
                 self.execute(instruction)
-                self.inx('PC')
                 if self.bits_to_int(self.reg_r('PC')) >= 1015:  # 假设停止条件
                     break
             
