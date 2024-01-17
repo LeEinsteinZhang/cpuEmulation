@@ -335,6 +335,7 @@ class CPU:
 
     def jmp(self, addr):
         self.reg_w('PC', addr)
+        self.dcx('PC')
 
     def jccc(self, addr, ccc):
         pass
@@ -1182,8 +1183,11 @@ class CPU:
     def run(self):
         while True:
             instruction = self.fetch()
-            self.execute(instruction)
-            self.inx('PC')
-            if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
+            if instruction == [0,0,0,0,0,0,0,0]:
                 break
+            else:
+                self.execute(instruction)
+                self.inx('PC')
+                if self.bits_to_int(self.reg_r('PC')) >= 1015:  # 假设停止条件
+                    break
             

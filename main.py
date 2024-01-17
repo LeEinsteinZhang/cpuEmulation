@@ -182,9 +182,9 @@ c2.mem.cells[1008].write([0, 1, 1, 1, 1, 0, 0, 0]) #       mov a,b  ;Copy B to A
 c2.mem.cells[1009].write([1, 0, 1, 1, 0, 0, 0, 1]) #       ora c    ;A = A | C    (are both B and C zero?)
 c2.mem.cells[1010].write([1, 1, 0, 0, 0, 0, 1, 0]) #       jnz loop ;Jump to 'loop:' if the zero-flag is not set.
 c2.mem.cells[1011].write([0, 0, 0, 0, 0, 0, 1, 1]) # <-|
-c2.mem.cells[1012].write([1, 1, 1, 0, 1, 0, 1, 0]) # <-|-- 1002 int bits
+c2.mem.cells[1012].write([1, 1, 1, 0, 1, 0, 1, 1]) # <-|-- 1003 int bits
 c2.mem.cells[1013].write([1, 1, 0, 0, 1, 0, 0, 1]) #       ret      ;Return
-
+c2.mem.cells[1014].write([0, 0, 0, 0, 0, 0, 0, 0]) #       nop
 c2.run()
 
 same = True
