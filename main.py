@@ -150,7 +150,7 @@ print(c1.reg_r('DE') == c1.int_to_bits_16b(2))
 
 
 c2 = CPU() # initial
-n_bytes = 256
+n_bytes = 512
 source_addr = 1024
 target_addr = 2048
 for i in range(n_bytes):
@@ -191,3 +191,8 @@ same = True
 for i in range(n_bytes):
     same = same and (c2.mem.cells[source_addr + i].read() == c2.mem.cells[target_addr + i].read())
 print(same)
+
+c2.reg_w('BC', c2.int_to_bits_16b(n_bytes))
+c2.push('BC')
+c2.pop('DE')
+print(c2.reg_r('DE') == c2.int_to_bits_16b(n_bytes))

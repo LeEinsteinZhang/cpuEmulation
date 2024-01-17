@@ -13,6 +13,9 @@ from memory import *
 EXIT_SUCESS = 1
 EXIT_FAIL = 0
 EXIT_ERROR = -1
+NULL = [0,0,0,0,0,0,0,0]
+HIGH = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
     def __init__(self) -> None:
@@ -22,7 +25,7 @@ class CPU:
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 2  E:[0...7] D:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 3  L:[0...7] H:[8...15]   16-bits
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], # <- 4  SP:[0...15]            16-bits
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 4  SP:[0...15]            16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 5  PC:[0...15]            16-bits
                 #    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^
                 #    00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15
@@ -359,10 +362,27 @@ class CPU:
         pass
 
     def push(self, RP):
-        pass
+        # Always split the data into lower and higher bytes
+        data = self.reg_r(RP)
+        lb = data[:8]
+        hb = data[8:]
+
+        # Push higher byte and then lower byte onto the stack
+        self.dcx('SP')
+        self.mem.io(1, self.reg_r('SP'), hb)
+        self.dcx('SP')
+        self.mem.io(1, self.reg_r('SP'), lb)
 
     def pop(self, RP):
-        pass
+        if self.reg_r('SP') == HIGH:
+            print("EMPTY STACK")
+        else:
+            lb = self.mem.io(0, self.reg_r('SP'))
+            self.inx('SP')
+            hb = self.mem.io(0, self.reg_r('SP'))
+            self.inx('SP')
+            data = lb + hb
+            self.reg_w(RP, data)
 
     def xthl(self):
         pass
