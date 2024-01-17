@@ -24,13 +24,13 @@ class CPU:
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 2  E:[0...7] D:[8...15]   16-bits
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 3  L:[0...7] H:[8...15]   16-bits
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], # <- 3  L:[0...7] H:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 4  SP:[0...15]            16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 5  PC:[0...15]            16-bits
                 #    ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^  ^
                 #    00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15
                     ]
-
+        
     def reg_reader(self, num, start, end):
         result = []
         for i in range(start, end + 1):
@@ -359,7 +359,7 @@ class CPU:
         pass
 
     def pchl(self):
-        pass
+        self.jmp(self.reg_r('HL'))
 
     def push(self, RP):
         # Always split the data into lower and higher bytes
@@ -385,7 +385,14 @@ class CPU:
             self.reg_w(RP, data)
 
     def xthl(self):
-        pass
+        lb = self.reg_r('L')
+        hb = self.reg_r('H')
+        self.reg_w('L',self.mem.io(0,self.reg_r('SP')))
+        self.mem.io(1,self.reg_r('SP'),lb)
+        self.inx('SP')
+        self.reg_w('H',self.mem.io(0,self.reg_r('SP')))
+        self.mem.io(1,self.reg_r('SP'),hb)
+        self.dcx('SP')
 
     def sphl(self):
         pass
@@ -408,6 +415,12 @@ class CPU:
     def nop(self):
         return 0
     
+    #################################################################################
+    #
+    # BELOW IS THE CPU EXECTUTIO
+    #
+    #################################################################################
+
     def fetch(self):
         instruction = self.mem.io(0,self.reg_r('PC'))
         return instruction
