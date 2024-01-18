@@ -1,0 +1,12 @@
+      mov a,b
+      ora c
+      rz
+loop: ldax d
+      mov m,a
+      inx d
+      inx h
+      dcx b
+      mov a,b
+      ora c
+      jnz loop
+      ret
