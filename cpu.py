@@ -18,7 +18,6 @@ LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
     def __init__(self, memory=0) -> None:
-        self.port = [0] * 40
         self.mem = memory
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
@@ -395,11 +394,12 @@ class CPU:
     def sphl(self):
         pass
 
-    def in_(self, port):
-        pass
+    def _in(self, byte):
+        self.reg_w('A', byte)
 
-    def out(self, port):
-        pass
+    def _out(self):
+        byte = self.reg_r('A')
+        return byte
 
     def ei(self):
         pass
@@ -536,8 +536,13 @@ class CPU:
             pass
             # Execute the operation for 00100000
         elif instruction == [0, 0, 1, 0, 0, 0, 0, 1]:
-            pass
-            # Execute the operation for 00100001
+            self.inx('PC')
+            lb = self.mem.io(0, self.reg_r('PC'))
+            self.inx('PC')
+            hb = self.mem.io(0, self.reg_r('PC'))
+            I = lb + hb
+            self.lxi('HL', I)
+
         elif instruction == [0, 0, 1, 0, 0, 0, 1, 0]:
             pass
             # Execute the operation for 00100010
@@ -589,9 +594,8 @@ class CPU:
             self.inx('PC')
             hb = self.mem.io(0, self.reg_r('PC'))
             I = lb + hb
-
             self.lxi('SP', I)
-            # Execute the operation for 00110001
+
         elif instruction == [0, 0, 1, 1, 0, 0, 1, 0]:
             pass
             # Execute the operation for 00110010
@@ -1228,6 +1232,6 @@ class CPU:
                 break
             else:
                 self.execute(instruction)
-                if self.bits_to_int(self.reg_r('PC')) >= 1015:  # 假设停止条件
+                if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
                     break
             

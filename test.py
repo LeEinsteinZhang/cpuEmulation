@@ -151,6 +151,7 @@ print("dcx test pass?=",c1.reg_r('DE') == c1.int_to_bits_16b(1))
 
 #push test
 c1.reg_w('BC', c1.int_to_bits_16b(128))
+c1.reg_w('SP',c1.int_to_bits_16b(65535))
 c1.push('BC')
 print("push test pass?=", c1.mem.cells[65533].read() + c1.mem.cells[65534].read() == c1.int_to_bits_16b(128))
 

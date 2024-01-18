@@ -6,4 +6,3 @@ from bios import *
 c1 = CPU()
 m1 = Memory()
 BIOS(c1, m1)
-print(c1.reg)
