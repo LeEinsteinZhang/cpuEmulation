@@ -17,7 +17,8 @@ HIGH = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
-    def __init__(self, memory) -> None:
+    def __init__(self, bins, memory) -> None:
+        self.bins = bins
         self.mem = memory
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
@@ -198,11 +199,18 @@ class CPU:
         self.reg_w(RP, I)
 
     def lda(self, addr):
-        self.reg_w('A', self.mem.io(0, addr))
+        self.bins.WR = 0
+        self.bins.A = addr
+        self.mem.act()
+        data = self.bins.D
+        self.reg_w('A', data)
         return EXIT_SUCESS
 
     def sta(self, addr):
-        self.mem.io(1, addr, self.reg_r('A'))
+        self.bins.D = self.reg_r('A')
+        self.bins.A = addr
+        self.bins.WR = 1
+        self.mem.act()
         return EXIT_SUCESS
 
     def lhld(self, addr):
