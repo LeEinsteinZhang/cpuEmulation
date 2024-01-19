@@ -17,7 +17,8 @@ HIGH = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
-    def __init__(self, memory=0) -> None:
+    def __init__(self, memory=0, exec=0) -> None:
+        self.exec = exec
         self.mem = memory
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
@@ -395,7 +396,7 @@ class CPU:
         pass
 
     def _in(self, byte):
-        self.reg_w('A', byte)
+        self.exec.load(byte)
 
     def _out(self):
         byte = self.reg_r('A')
