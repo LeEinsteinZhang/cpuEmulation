@@ -23,7 +23,8 @@ class Byte:
 
 
 class Memory:
-    def __init__(self):
+    def __init__(self, bins):
+        self.bins = bins
         self.size = 64 * 1024 # 64KB memory [0x0000 to 0xFFFF] 16 bit address
         self.cells = [Byte() for i in range(self.size)]
 
@@ -35,3 +36,13 @@ class Memory:
             return self.cells[addr_dec].read()
         else:
             return -1
+    
+    def act(self):
+        rw = self.bins.WR
+        addr = self.bins.A
+        addr_dec = addr_converter(addr)
+        if rw == 0:
+            self.bins.D = self.cells[addr_dec].read()
+        elif rw == 1:
+            data = self.bins.D
+            self.cells[addr_dec].write(data)
