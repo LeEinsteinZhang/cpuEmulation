@@ -27,22 +27,16 @@ class Memory:
         self.bins = bins
         self.size = 64 * 1024 # 64KB memory [0x0000 to 0xFFFF] 16 bit address
         self.cells = [Byte() for i in range(self.size)]
-
-    def io(self, rw, addr, data=[0,0,0,0,0,0,0,0]):
-        addr_dec = addr_converter(addr)
-        if rw == 1:
-            self.cells[addr_dec].write(data)
-        elif rw == 0:
-            return self.cells[addr_dec].read()
-        else:
-            return -1
     
     def act(self):
         rw = self.bins.WR
         addr = self.bins.A
+        dbin = self.bins.DBIN
+        data = self.bins.D
         addr_dec = addr_converter(addr)
-        if rw == 0:
-            self.bins.D = self.cells[addr_dec].read()
-        elif rw == 1:
-            data = self.bins.D
+        if not rw and not dbin:
             self.cells[addr_dec].write(data)
+        elif rw and dbin:
+            self.bins.D = self.cells[addr_dec].read()
+        else:
+            print("SSS")

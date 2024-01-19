@@ -186,7 +186,11 @@ class CPU:
 
     def mov(self, D, S):
         if D == 'M':
-            self.mem.io(1, self.reg_r(D), self.reg_r(S))
+            self.bins.D = self.reg_r(S)
+            self.bins.DBIN = 0
+            self.bins.A = self.reg_r('M')
+            self.bins.WR = 0
+            self.mem.act()
         else:
             self.reg_w(D, self.reg_r(S))
             return EXIT_SUCESS
@@ -199,28 +203,41 @@ class CPU:
         self.reg_w(RP, I)
 
     def lda(self, addr):
-        self.bins.WR = 0
+        self.bins.DBIN = 1
+        self.bins.WR = 1
         self.bins.A = addr
         self.mem.act()
         data = self.bins.D
         self.reg_w('A', data)
-        return EXIT_SUCESS
 
     def sta(self, addr):
         self.bins.D = self.reg_r('A')
+        self.bins.DBIN = 0
         self.bins.A = addr
-        self.bins.WR = 1
+        self.bins.WR = 0
         self.mem.act()
-        return EXIT_SUCESS
 
     def lhld(self, addr):
-        addr_1 = self.adder(addr, self.int_to_bits_16b(1))
-        self.reg_w('HL', self.mem.io(0,addr) + self.mem.io(0,addr_1))
+        self.bins.DBIN = 1
+        self.bins.WR = 1
+        self.bins.A = addr
+        self.mem.act()
+        data = self.bins.D
+        self.reg_w('H', data)
+        self.bins.A = self.adder(addr, self.int_to_bits_16b(1))
+        self.mem.act()
+        data = self.bins.D
+        self.reg_w('L', data)
 
     def shld(self, addr):
-        addr_1 = self.adder(addr, self.int_to_bits_16b(1))
-        self.mem.io(1, addr, self.reg_r('HL')[:8])
-        self.mem.io(1, addr_1, self.reg_r('HL')[8:])
+        self.bins.D = self.reg_r('H')
+        self.bins.DBIN = 0
+        self.bins.A = addr
+        self.bins.WR = 0
+        self.mem.act()
+        self.bins.D = self.reg_r('L')
+        self.bins.A = self.adder(addr, self.int_to_bits_16b(1))
+        self.mem.act()
 
     def ldax(self, RP):
         addr = self.reg_r(RP)
@@ -374,29 +391,59 @@ class CPU:
         hb = data[8:]
         # Push higher byte and then lower byte onto the stack
         self.dcx('SP')
-        self.mem.io(1, self.reg_r('SP'), hb)
+        self.bins.D = hb
+        self.bins.DBIN = 0
+        self.bins.A = self.reg_r('SP')
+        self.bins.WR = 0
+        self.mem.act()
         self.dcx('SP')
-        self.mem.io(1, self.reg_r('SP'), lb)
+        self.bins.D = lb
+        self.bins.A = self.reg_r('SP')
+        self.mem.act()
 
     def pop(self, RP):
         if self.reg_r('SP') == HIGH:
             print("EMPTY STACK")
         else:
-            lb = self.mem.io(0, self.reg_r('SP'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('SP')
+            self.mem.act()
+            lb = self.bins.D
             self.inx('SP')
-            hb = self.mem.io(0, self.reg_r('SP'))
+            self.bins.A = self.reg_r('SP')
+            self.mem.act()
+            hb = self.bins.D
             self.inx('SP')
             data = lb + hb
             self.reg_w(RP, data)
 
     def xthl(self):
-        lb = self.reg_r('L')
-        hb = self.reg_r('H')
-        self.reg_w('L',self.mem.io(0,self.reg_r('SP')))
-        self.mem.io(1,self.reg_r('SP'),lb)
+        L = self.reg_r('L')
+        H = self.reg_r('H')
+        self.bins.DBIN = 1
+        self.bins.WR = 1
+        self.bins.A = self.reg_r('SP')
+        self.mem.act()
+        lb = self.bins.D
+        self.reg_w('L',lb)
+        self.bins.D = L
+        self.bins.DBIN = 0
+        self.bins.A = self.reg_r('SP')
+        self.bins.WR = 0
+        self.mem.act()
         self.inx('SP')
-        self.reg_w('H',self.mem.io(0,self.reg_r('SP')))
-        self.mem.io(1,self.reg_r('SP'),hb)
+        self.bins.DBIN = 1
+        self.bins.WR = 1
+        self.bins.A = self.reg_r('SP')
+        self.mem.act()
+        hb = self.bins.D
+        self.reg_w('H',hb)
+        self.bins.D = H
+        self.bins.DBIN = 0
+        self.bins.A = self.reg_r('SP')
+        self.bins.WR = 0
+        self.mem.act()
         self.dcx('SP')
 
     def sphl(self):
@@ -430,7 +477,11 @@ class CPU:
         pass
 
     def fetch(self):
-        instruction = self.mem.io(0,self.reg_r('PC'))
+        self.bins.DBIN = 1
+        self.bins.WR = 1
+        self.bins.A = self.reg_r('PC')
+        self.mem.act()
+        instruction = self.bins.D
         return instruction
 
     def execute(self, instruction):
@@ -439,9 +490,15 @@ class CPU:
 
         elif instruction == [0, 0, 0, 0, 0, 0, 0, 1]:
             self.inx('PC')
-            lb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
             self.inx('PC')
-            hb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
             data = lb + hb
             self.lxi('BC', data)
 
@@ -459,7 +516,11 @@ class CPU:
 
         elif instruction == [0, 0, 0, 0, 0, 1, 1, 0]:
             self.inx('PC')
-            data = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            data = self.bins.D
             self.mvi('B', data)
 
         elif instruction == [0, 0, 0, 0, 0, 1, 1, 1]:
@@ -485,7 +546,11 @@ class CPU:
 
         elif instruction == [0, 0, 0, 0, 1, 1, 1, 0]:
             self.inx('PC')
-            data = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            data = self.bins.D
             self.mvi('C', data)
 
         elif instruction == [0, 0, 0, 0, 1, 1, 1, 1]:
@@ -544,9 +609,15 @@ class CPU:
             # Execute the operation for 00100000
         elif instruction == [0, 0, 1, 0, 0, 0, 0, 1]:
             self.inx('PC')
-            lb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
             self.inx('PC')
-            hb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
             I = lb + hb
             self.lxi('HL', I)
 
@@ -597,9 +668,15 @@ class CPU:
             # Execute the operation for 00110000
         elif instruction == [0, 0, 1, 1, 0, 0, 0, 1]:
             self.inx('PC')
-            lb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
             self.inx('PC')
-            hb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
             I = lb + hb
             self.lxi('SP', I)
 
@@ -1037,9 +1114,15 @@ class CPU:
             # Execute the operation for 11000001
         elif instruction == [1, 1, 0, 0, 0, 0, 1, 0]:
             self.inx('PC')
-            lb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
             self.inx('PC')
-            hb = self.mem.io(0, self.reg_r('PC'))
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
             addr = lb + hb
             if not self.get_Z():
                 self.jmp(addr)
