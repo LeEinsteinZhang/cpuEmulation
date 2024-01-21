@@ -1,3 +1,6 @@
+      lxi bc, 512
+      lxi de, 1024
+      lxi hl, 2048
       mov a,b
       ora c
       rz
