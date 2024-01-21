@@ -380,6 +380,14 @@ class CPU:
         pass
 
     def ret(self):
+        self.bins.D = [0, 0, 0, 0, 0, 0, 0, 0]
+        self.bins.WR = 0
+        self.bins.A = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.bins.RESET = 0
+        self.bins.INTE = 0
+        self.bins.DBIN = 0
+        self.bins.WAIT = 0
+        self.bins.READY = 0
         return EXIT_SUCESS
 
     def rccc(self, ccc):
@@ -606,8 +614,8 @@ class CPU:
             pass
             # Execute the operation for 00011000
         elif instruction == [0, 0, 0, 1, 1, 0, 0, 1]:
-            pass
-            # Execute the operation for 00011001
+            self.dad('DE')
+
         elif instruction == [0, 0, 0, 1, 1, 0, 1, 0]:
             self.ldax('DE')
 
@@ -644,8 +652,19 @@ class CPU:
             self.lxi('HL', I)
 
         elif instruction == [0, 0, 1, 0, 0, 0, 1, 0]:
-            pass
-            # Execute the operation for 00100010
+            self.inx('PC')
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
+            self.inx('PC')
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
+            addr = lb + hb
+            self.shld(addr)
+
         elif instruction == [0, 0, 1, 0, 0, 0, 1, 1]:
             self.inx('HL')
 
