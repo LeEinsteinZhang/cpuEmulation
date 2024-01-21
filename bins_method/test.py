@@ -11,19 +11,17 @@ c1 = CPU(b1, m1, 0)
 c1.mem.cells[0].write([0, 1, 1, 1, 1, 0, 0, 0])
 
 c1.lda([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-print(b1.D)
-print(c1.reg_r('A'))
+print("lda test:", c1.reg_r('A') == [0, 1, 1, 1, 1, 0, 0, 0])
 c1.mem.cells[0].write([0,0,0,0,0,0,0,0])
-print(c1.mem.cells[0].read())
 c1.sta([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-print(c1.mem.cells[0].read())
+print("sta test:", c1.mem.cells[0].read() == [0, 1, 1, 1, 1, 0, 0, 0])
 
 
 c1.lhld([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-print(c1.reg_r('HL'))
+print("lhld test:", c1.reg_r('HL') == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0])
 
 c1.shld([0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0])
-print(c1.mem.cells[4].read())
+print("shld test:", c1.mem.cells[4].read() == [0, 1, 1, 1, 1, 0, 0, 0])
 
 
 
