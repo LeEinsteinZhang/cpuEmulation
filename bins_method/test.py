@@ -1,3 +1,4 @@
+from assembler import *
 from bins import *
 from bios import *
 from cpu import *
@@ -71,8 +72,9 @@ for i in range(n_bytes):
     same = same and (c2.mem.cells[source_addr + i].read() == c2.mem.cells[target_addr + i].read())
 print("memcpy asm tst pass?=",same)
 
+asm_bin("./memcpy")
 
-memcpy =  load_binary_file("./memcpy_exec")
+memcpy =  load_binary_file(asm_bin("./memcpy"))
 
 b3 = BINS()
 m3 = Memory(b3)

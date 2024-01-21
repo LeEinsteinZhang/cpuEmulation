@@ -1,23 +1,38 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 int main() {
-    FILE *file;
-    char buffer[1000];
+    char str1[100], str2[100];
+    char buffer[100];
+    int intValue;
+    char charValue;
 
-    // 打开文件
-    file = fopen("./memcpy", "r");
-    if (file == NULL) {
-        perror("Error in opening file");
-        return(-1);
+    while (1) {
+        printf("Enter input (str str int/char/str int/char/str): ");
+        if (scanf("%s %s", str1, str2) != 2) break;
+
+        // 读取第三个值
+        scanf("%s", buffer);
+        if (sscanf(buffer, "%d", &intValue) == 1) {
+            // 输入是整数
+            printf("Third value is an integer: %d\n", intValue);
+        } else {
+            // 输入是字符串
+            printf("Third value is a string: %s\n", buffer);
+        }
+
+        // 读取第四个值
+        scanf("%s", buffer);
+        if (sscanf(buffer, "%d", &intValue) == 1) {
+            // 输入是整数
+            printf("Fourth value is an integer: %d\n", intValue);
+        } else if (sscanf(buffer, "%c", &charValue) == 1) {
+            // 输入是字符
+            printf("Fourth value is a character: %c\n", charValue);
+        } else {
+            // 输入是字符串
+            printf("Fourth value is a string: %s\n", buffer);
+        }
     }
-
-    // 读取并显示文件内容
-    while (fgets(buffer, 1000, file) != NULL)
-        printf("%s", buffer);
-
-    // 关闭文件
-    fclose(file);
 
     return 0;
 }
