@@ -1365,11 +1365,11 @@ class CPU:
     def run(self):
         while True:
             instruction = self.fetch()
-            if instruction == [0,0,0,0,0,0,0,0]:
-                break
-            else:
+            # if instruction == [0,0,0,0,0,0,0,0]:
+            #     break
+            # else:
                 # print(self.bits_to_int(self.reg_r('PC')), instruction)
-                self.execute(instruction)
-                if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
-                    break
-            
+            self.execute(instruction)
+            if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
+                break
+        

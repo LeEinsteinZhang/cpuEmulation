@@ -140,5 +140,6 @@ BIOS(c3)
 
 same = True
 for i in range(n_bytes):
+    # print(c3.mem.cells[source_addr + i].read(), c3.mem.cells[target_addr + i].read())
     same = same and (c3.mem.cells[source_addr + i].read() == c3.mem.cells[target_addr + i].read())
 print("memcpy asm tst pass?=",same)

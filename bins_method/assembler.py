@@ -93,7 +93,7 @@ def asm_bin(filename):
     bin = ''
 
     with open(filename, 'r') as file:
-        mem_addr = 15
+        mem_addr = 16
         loop = 0
         flag = 0
         for line in file:
