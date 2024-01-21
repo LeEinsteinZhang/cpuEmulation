@@ -1,3 +1,5 @@
+from assembler import *
+
 def load_binary_file(filename):
     """
     Load a binary text file and convert its content to a list of lists of integers.
@@ -33,9 +35,9 @@ def load_binary_file(filename):
     return list_of_lists
 
 class Program:
-    def __init__(self, bins, program):
+    def __init__(self, bins, filename):
         self.bins = bins
-        self.program = program
+        self.program = load_binary_file(asm_bin(filename))
         self.i = 0
 
     def load(self):

@@ -1,4 +1,3 @@
-from assembler import *
 from bins import *
 from bios import *
 from cpu import *
@@ -23,7 +22,6 @@ print("lhld test:", c1.reg_r('HL') == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
 
 c1.shld([0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0])
 print("shld test:", c1.mem.cells[4].read() == [0, 1, 1, 1, 1, 0, 0, 0])
-
 
 
 # asm code encoding tests
@@ -72,13 +70,10 @@ for i in range(n_bytes):
     same = same and (c2.mem.cells[source_addr + i].read() == c2.mem.cells[target_addr + i].read())
 print("memcpy asm tst pass?=",same)
 
-asm_bin("./memcpy")
-
-memcpy =  load_binary_file(asm_bin("./memcpy"))
 
 b3 = BINS()
 m3 = Memory(b3)
-p3 = Program(b3, memcpy)
+p3 = Program(b3, "./memcpy")
 c3 = CPU(b3, m3, p3)
 
 n_bytes = 512
