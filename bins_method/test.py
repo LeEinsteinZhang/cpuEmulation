@@ -91,6 +91,8 @@ BIOS(c3)
 
 # after bios built in program loader following will load into memory
 
+# The following program are shown in wikipedia:
+# https://en.wikipedia.org/wiki/Intel_8080#
 
 #  memcpy --
 #  Copy a block of memory from one location to another.
