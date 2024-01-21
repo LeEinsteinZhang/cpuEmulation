@@ -17,9 +17,10 @@ HIGH = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 LOW = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 class CPU:
-    def __init__(self, bins, memory) -> None:
+    def __init__(self, bins, memory, program) -> None:
         self.bins = bins
         self.mem = memory
+        self.program = program
         self.reg = [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 0  F:[0...7] A:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 1  C:[0...7] B:[8...15]   16-bits
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # <- 2  E:[0...7] D:[8...15]   16-bits
@@ -109,30 +110,30 @@ class CPU:
         else:
             return EXIT_ERROR
 
-    def set_C(self):
-        self.reg[0][0] = 1
+    def set_C(self, n):
+        self.reg[0][0] = n
 
     def get_C(self):
         return self.reg[0][0]
 
-    def set_P(self):
-        self.reg[0][2] = 1
+    def set_P(self, n):
+        self.reg[0][2] = n
 
     def get_P(self):
         return self.reg[0][2]
-    def set_A(self):
-        self.reg[0][4] = 1
+    def set_A(self, n):
+        self.reg[0][4] = n
 
     def get_A(self):
         return self.reg[0][4]
 
-    def set_Z(self):
-        self.reg[0][6] = 1
+    def set_Z(self, n):
+        self.reg[0][6] = n
 
     def get_Z(self):
         return self.reg[0][6]
-    def set_S(self):
-        self.reg[0][7] = 1
+    def set_S(self, n):
+        self.reg[0][7] = n
 
     def get_S(self):
         return self.reg[0][7]
@@ -318,7 +319,9 @@ class CPU:
         for i in range(8):
             self.reg[0][8+i] = self.reg[0][8+i] or self.reg_r(S)[i]
         if not self.bits_to_int(self.reg_r('A')):
-            self.set_Z()
+            self.set_Z(1)
+        else:
+            self.set_Z(0)
 
     def ori(self, I):
         for i in range(8):
@@ -336,7 +339,11 @@ class CPU:
         pass
 
     def cpi(self, I):
-        pass
+        A = self.reg_r('A')
+        if I == A:
+            self.set_Z(1)
+        else:
+            self.set_Z(0)
 
     def rlc(self):
         pass
@@ -449,10 +456,13 @@ class CPU:
     def sphl(self):
         pass
 
-    def _in(self, byte):
-        pass
+    def _in(self):
+        self.program.load()
+        data = self.bins.D
 
-    def _out(self, byte):
+        self.reg_w('A', data)
+
+    def _out(self):
         pass
 
     def ei(self):
@@ -560,7 +570,19 @@ class CPU:
             pass
             # Execute the operation for 00010000
         elif instruction == [0, 0, 0, 1, 0, 0, 0, 1]:
-            pass
+            self.inx('PC')
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            lb = self.bins.D
+            self.inx('PC')
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            hb = self.bins.D
+            data = lb + hb
+            self.lxi('DE', data)
+
             # Execute the operation for 00010001
         elif instruction == [0, 0, 0, 1, 0, 0, 1, 0]:
             pass
@@ -646,8 +668,8 @@ class CPU:
             pass
             # Execute the operation for 00101001
         elif instruction == [0, 0, 1, 0, 1, 0, 1, 0]:
-            pass
-            # Execute the operation for 00101010
+            self.stax('HL')
+
         elif instruction == [0, 0, 1, 0, 1, 0, 1, 1]:
             pass
             # Execute the operation for 00101011
@@ -1201,8 +1223,8 @@ class CPU:
             pass
             # Execute the operation for 11011010
         elif instruction == [1, 1, 0, 1, 1, 0, 1, 1]:
-            pass
-            # Execute the operation for 11011011
+            self._in()
+
         elif instruction == [1, 1, 0, 1, 1, 1, 0, 0]:
             pass
             # Execute the operation for 11011100
@@ -1306,8 +1328,14 @@ class CPU:
             pass
             # Execute the operation for 11111101
         elif instruction == [1, 1, 1, 1, 1, 1, 1, 0]:
-            pass
-            # Execute the operation for 11111110
+            self.inx('PC')
+            self.bins.DBIN = 1
+            self.bins.WR = 1
+            self.bins.A = self.reg_r('PC')
+            self.mem.act()
+            I = self.bins.D
+            self.cpi(I)
+
         elif instruction == [1, 1, 1, 1, 1, 1, 1, 1]:
             pass
             # Execute the operation for 11111111
@@ -1321,6 +1349,7 @@ class CPU:
             if instruction == [0,0,0,0,0,0,0,0]:
                 break
             else:
+                # print(self.bits_to_int(self.reg_r('PC')), instruction)
                 self.execute(instruction)
                 if self.bits_to_int(self.reg_r('PC')) >= 65535:  # 假设停止条件
                     break
