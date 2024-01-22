@@ -98,7 +98,6 @@ def asm_bin(filename):
         flag = 0
         for line in file:
             asm = line.replace(',', '').strip().split()
-            n_in = len(asm)
             if asm[0] == 'loop:':
                 flag = 1
                 loop = mem_addr
