@@ -21,4 +21,3 @@ def BIOS(cpu):
     cpu.mem.cells[14].write([0, 0, 0, 0, 0, 1, 1, 1]) # <-| 7
 
     cpu.run()
-
