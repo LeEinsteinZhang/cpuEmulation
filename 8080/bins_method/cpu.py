@@ -346,10 +346,16 @@ class CPU:
             self.set_Z(0)
 
     def rlc(self):
-        pass
+        val_A = self.reg_r('A')
+        rotated = val_A[1:] + val_A[:1]
+        self.reg_w('A', rotated)
+        # Implemented by ChatGPT
 
     def rrc(self):
-        pass
+        val_A = self.reg_r('A')
+        rotated = val_A[-1:] + val_A[:-1]
+        self.reg_w('A', rotated)
+        # Implemented by ChatGPT
 
     def ral(self):
         pass
@@ -370,14 +376,12 @@ class CPU:
         self.reg_w('PC', addr)
         self.dcx('PC')
 
-    def jccc(self, addr, ccc):
-        pass
-
     def call(self, addr):
-        pass
-
-    def cccc(self, addr, ccc):
-        pass
+        # Push the current PC to stack
+        self.push('PC')
+        # Jump to the address
+        self.jmp(addr)
+        # Implemented by ChatGPT
 
     def ret(self):
         self.bins.D = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -389,9 +393,6 @@ class CPU:
         self.bins.WAIT = 0
         self.bins.READY = 0
         return EXIT_SUCESS
-
-    def rccc(self, ccc):
-        pass
 
     def rst(self, n):
         pass
@@ -462,7 +463,9 @@ class CPU:
         self.dcx('SP')
 
     def sphl(self):
-        pass
+        hl_val = self.reg_r('HL')
+        self.reg_w('SP', hl_val)
+        # Implemented by ChatGPT
 
     def _in(self):
         self.program.load()
@@ -474,10 +477,11 @@ class CPU:
         pass
 
     def ei(self):
-        pass
+        self.bins.INTE = 1
 
     def di(self):
-        pass
+        self.bins.INTE = 0
+        # Implemented by ChatGPT
 
     def hlt(self):
         pass
