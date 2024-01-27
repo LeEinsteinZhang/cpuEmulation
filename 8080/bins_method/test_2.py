@@ -6,9 +6,13 @@ from program import *
 
 b1 = BINS()
 m1 = Memory(b1)
-p1 = Program(b1, "./add")
+p1 = Program(b1, "./memcpy")
 c1 = CPU(b1, m1, p1)
 
 BIOS(c1)
 
-print(c1.bits_to_int(m1.cells[4097].read() + m1.cells[4096].read()) == 579)
+same = True
+for i in range(512):
+    # print(c3.mem.cells[source_addr + i].read(), c3.mem.cells[target_addr + i].read())
+    same = same and (c1.mem.cells[1024 + i].read() == c1.mem.cells[2048 + i].read())
+print("memcpy asm tst pass?=",same)
