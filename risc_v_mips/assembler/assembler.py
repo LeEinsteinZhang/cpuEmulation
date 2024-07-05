@@ -2,6 +2,7 @@ import re
 
 # Define the instruction formats
 INSTRUCTION_SET = {
+    '.word': ('W'),
     'add':  ('R', (3, 0), '000000', '100000'),
     'sub':  ('R', (3, 0), '000000', '100010'),
     'mult': ('R', (2, 0), '000000', '011000'),
@@ -68,23 +69,34 @@ def parse_register(reg):
     return REGISTER_MAP.get(reg, None)
 
 def parse_immediate(imm):
-    return to_bin_str(int(imm), 16)
+    if imm.startswith('0x'):
+        return to_bin_str(int(imm, 16), 16)
+    else:
+        return to_bin_str(int(imm), 16)
 
 def parse_label(label, label_dict, pc):
     label_pos = label_dict[label]
     if label_pos > pc:
         skip_num = label_dict[label] - pc
     else:
-        skip_num = label_dict[label] - (pc + 1)
+        skip_num = label_dict[label] - (pc + 4)
     return to_bin_str(skip_num, 16)
+
+def jump_immediate(imm):
+    if imm.startswith('0x'):
+        return to_bin_str(int(imm, 16), 26)
+    else:
+        return to_bin_str(int(imm), 26)
+
 
 # Assembler function
 def assemble_instruction(instruction, label_dict, pc):
     parts = re.split(r'[,\s()]+', instruction.strip())
     opcode = parts[0]
     instr_type, *code = INSTRUCTION_SET[opcode]
-
-    if instr_type == 'R':
+    if instr_type == 'W':
+        print(parts[1])
+    elif instr_type == 'R':
         num_registers, start_pos = code[0]
         std = ['00000', '00000', '00000']
         
@@ -116,7 +128,12 @@ def assemble_instruction(instruction, label_dict, pc):
         return '{}{}{}{}'.format(code[0], rs, rt, imm)
     
     elif instr_type == 'J':
-        address = parse_label(parts[1], label_dict, pc)
+        label = parts[1]
+        if parts[1] not in label_dict:
+
+            address = jump_immediate(label)
+        else:
+            address = parse_label(label, label_dict, pc)
         return '{}{}'.format(code[0], address)
     
     else:
@@ -138,9 +155,9 @@ def assemble_program(program):
             label = clean_line.split(':')[0].strip()
             label_dict[label] = pc
             if instruction:
-                pc += 1
+                pc += 4
         else:
-            pc += 1
+            pc += 4
 
     # Second pass: assemble instructions
     pc = 0
@@ -153,10 +170,10 @@ def assemble_program(program):
             instruction = clean_line.split(':')[1].strip()
             if instruction:
                 binary_instructions.append(assemble_instruction(instruction, label_dict, pc))
-                pc += 1
+                pc += 4
         else:
             binary_instructions.append(assemble_instruction(clean_line, label_dict, pc))
-            pc += 1
+            pc += 4
 
     return '\n'.join(binary_instructions)
 
@@ -192,16 +209,16 @@ end:    jr $31              ; 11 return
 # """
 
 ans = """00100000000010100000000000001010
-00010000001000000000000000001010
+00010000001000000000000000101000
 00000000001010100000000000011010
 00000000000000000000100000010010
 00000000000000000010000000010000
 00000000100000100000000000011010
 00000000000000000010100000010000
-00010000101000000000000000000010
-00010000000000001111111111111000
+00010000101000000000000000001000
+00010000000000001111111111100000
 00000000011001000001100000100000
-00010000000000001111111111110110
+00010000000000001111111111011000
 00000011111000000000000000001000
 """
 
@@ -229,4 +246,9 @@ def checker(s1, s2):
             return False
     else:
         return False
+
+
 print(checker(binary_output,ans))
+
+
+print(binary_output)
