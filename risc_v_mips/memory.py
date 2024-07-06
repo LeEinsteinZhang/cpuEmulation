@@ -1,7 +1,7 @@
 def addr_converter(addr):
     addr_dec = 0
-    for i in range(16):
-        addr_dec += addr[15 - i] * 2 ** i
+    for i in range(32):
+        addr_dec += int(addr[31 - i]) * 2 ** i
     return addr_dec
 
 class Byte:
@@ -40,3 +40,5 @@ class Memory:
             self.bins.D = self.cells[addr_dec].read()
         else:
             print("SSS")
+
+print(addr_converter("00000000000000000000000000010000"))
