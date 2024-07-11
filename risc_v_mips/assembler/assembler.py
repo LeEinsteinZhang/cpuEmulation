@@ -76,11 +76,7 @@ def parse_immediate(imm):
 
 def parse_label(label, label_dict, pc):
     label_pos = label_dict[label]
-    if label_pos > pc:
-        skip_num = label_dict[label] - pc
-    else:
-        skip_num = label_dict[label] - (pc + 4)
-    return to_bin_str(skip_num, 16)
+    return to_bin_str((label_pos - (pc + 4)) // 4, 16)
 
 def jump_immediate(imm):
     if imm.startswith('0x'):
@@ -121,10 +117,15 @@ def assemble_instruction(instruction, label_dict, pc):
         else:
             rs = parse_register(parts[1])
             rt = parse_register(parts[2])
-        if parts[3] in label_dict:
-            imm = parse_label(parts[3], label_dict, pc)
+        if opcode == 'lw' or opcode == 'sw':
+            rs = parse_register(parts[3])
+            rt = parse_register(parts[1])
+            imm = parse_immediate(parts[2])
         else:
-            imm = parse_immediate(parts[3])
+            if parts[3] in label_dict:
+                imm = parse_label(parts[3], label_dict, pc)
+            else:
+                imm = parse_immediate(parts[3])
         return '{}{}{}{}'.format(code[0], rs, rt, imm)
     
     elif instr_type == 'J':
@@ -248,7 +249,21 @@ def checker(s1, s2):
         return False
 
 
-print(checker(binary_output,ans))
-
-
-print(binary_output)
+# print(checker(binary_output,ans))
+#
+#
+# print(binary_output)
+print(assemble_program("""
+beq $2, $0, endloop
+add $3, $0, $1
+add $4, $2, $0
+loop: addi $4, $4, -1
+lw $13, 0($3)
+slt $14, $13, $0
+bne $14, $0, endif
+sub $15, $13, $4
+sw $15, 0($3)
+endif: addi $3, $3, 4
+bne $4, $0, loop
+endloop: jr $31
+"""))
