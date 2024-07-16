@@ -129,9 +129,9 @@ def assemble_instruction(instruction, label_dict, pc):
         return '{}{}{}{}'.format(code[0], rs, rt, imm)
     
     elif instr_type == 'J':
+        print(parts, code)
         label = parts[1]
         if parts[1] not in label_dict:
-
             address = jump_immediate(label)
         else:
             address = parse_label(label, label_dict, pc)
@@ -177,6 +177,10 @@ def assemble_program(program):
             pc += 4
 
     return '\n'.join(binary_instructions)
+
+def hex_output(b_output):
+    binary_hex = '\n'.join('0x' + format(int(b, 2), '08x') for b in b_output.split('\n'))
+    return binary_hex
 
 # Example program with comments and labels
 example_program = """
@@ -253,7 +257,7 @@ def checker(s1, s2):
 #
 #
 # print(binary_output)
-print(assemble_program("""
+temp = assemble_program("""
 beq $2, $0, endloop
 add $3, $0, $1
 add $4, $2, $0
@@ -266,4 +270,9 @@ sw $15, 0($3)
 endif: addi $3, $3, 4
 bne $4, $0, loop
 endloop: jr $31
-"""))
+""")
+
+binary_hex = hex_output(temp)
+
+
+print(binary_hex)
