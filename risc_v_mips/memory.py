@@ -18,27 +18,23 @@ class Byte:
     def read(self):
         return self.data
 
-    # def __repr__(self):
-    #     return str(self.data)
-
+    def __repr__(self):
+        return str(self.data)
 
 class Memory:
-    def __init__(self, bins):
-        self.bins = bins
-        self.size = 1 * 1024 * 1024  # 1MB memory [0x0000 to 0xFFFF] 16 bit address
-        self.cells = [Byte() for i in range(self.size)]
-    
-    def act(self):
-        rw = self.bins.WR
-        addr = self.bins.A
-        dbin = self.bins.DBIN
-        data = self.bins.D
-        addr_dec = addr_converter(addr)
-        if not rw and not dbin:
-            self.cells[addr_dec].write(data)
-        elif rw and dbin:
-            self.bins.D = self.cells[addr_dec].read()
-        else:
-            print("SSS")
+    def __init__(self):
+        self.size = 64 * 1024 # 64KB memory [0x00000000 to 0x0000FFFF] 32 bit address
+        self.cells = [Byte() for _ in range(self.size)]
 
-print(addr_converter("00000000000000000000000000010000"))
+    def io(self, addr, size, type=0, data=[0,0,0,0,0,0,0]):
+        addr_dec = addr_converter(addr)
+        result = []
+        if type == 1:
+            for i in range(size):
+                self.cells[addr_dec + i].write(data[i*8:(i+1)*8])
+        elif type == 0:
+            for i in range(size):
+                result.extend(self.cells[addr_dec + i].read())
+            return result
+        else:
+            return -1
