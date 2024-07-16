@@ -76,7 +76,7 @@ def parse_immediate(imm):
 
 def parse_label(label, label_dict, pc):
     label_pos = label_dict[label]
-    return to_bin_str((label_pos - (pc + 4)) // 4, 16)
+    return str((label_pos - (pc + 4)) // 4)
 
 def jump_immediate(imm):
     if imm.startswith('0x'):
@@ -123,9 +123,9 @@ def assemble_instruction(instruction, label_dict, pc):
             imm = parse_immediate(parts[2])
         else:
             if parts[3] in label_dict:
-                imm = parse_label(parts[3], label_dict, pc)
+                imm = parse_immediate(parse_label(parts[3], label_dict, pc))
             else:
-                imm = parse_immediate(parts[3])
+                imm = parse_immediate(parse_immediate(parts[3]))
         return '{}{}{}{}'.format(code[0], rs, rt, imm)
     
     elif instr_type == 'J':
@@ -134,7 +134,7 @@ def assemble_instruction(instruction, label_dict, pc):
         if parts[1] not in label_dict:
             address = jump_immediate(label)
         else:
-            address = parse_label(label, label_dict, pc)
+            address = jump_immediate(parse_label(label, label_dict, pc))
         return '{}{}'.format(code[0], address)
     
     else:
@@ -258,21 +258,127 @@ def checker(s1, s2):
 #
 # print(binary_output)
 temp = assemble_program("""
-beq $2, $0, endloop
-add $3, $0, $1
-add $4, $2, $0
-loop: addi $4, $4, -1
-lw $13, 0($3)
-slt $14, $13, $0
-bne $14, $0, endif
-sub $15, $13, $4
-sw $15, 0($3)
-endif: addi $3, $3, 4
-bne $4, $0, loop
-endloop: jr $31
+;; CS230 - Assignment 5 - Question 1b
+;; Name:     Le Zhang
+;; Quest ID: l652zhan
+;; This program is a subroutine to check if the array elements are 
+;;   word aligned and process them using a predicate function wordaligned. 
+;;   It then produces the result array address and size.
+;; Registers: $1 ->  input/output, base address of original/filtered array
+;;            $2 ->  input/output, length of original/filtered array
+;;               |-> result of subroutine the base address of filtered array
+;;            $3 ->  result of subroutine the length of filtered array
+;;            $4 -> predicate function address
+;;            $5 -> base address of the original array
+;;            $6 -> length of the original array
+;;            $8 -> temporary register for most memory read and write
+        addi $4, $0, wordaligned ; assign the predicate function address to $4
+        add $5, $1, $0           ; assign base address of the original array to $5
+        add $6, $2, $0           ; assign the length of the original array to $6
+        addi $30, $30, -4        ; move to next stack slot
+        sw $31, 0($30)           ; store pc
+        jal filter               ; call filter function
+        lw $31, 0($30)           ; restore pc
+        addi $30, $30, 4         ; release one stack slot 
+
+        add $1, $2, $0           ; copy the base address of the filtered array to $1
+        add $2, $3, $0           ; copy the length of the filtered array to $1
+
+        jr $31                   ; end the program, return
+
+wordaligned:
+        addi $8, $0, 4           ; a constant 4 for bytes calculation
+        div $4, $8               ; divide input by 4
+        mfhi $8                  ; load reminder into $8
+        beq $8, $0, true         ; if reminder is zero jump to true (aligned)
+        addi $3, $0, 0           ; set $3 to 0 for false (not aligned)
+        beq $0, $0, w_end        ; jump to the w_end
+
+true:   addi $8, $0, -1          ; a constant -1 for checking non-negative number
+        slt $8, $8, $4           ; if the number is larger than -1 $8 set to 1
+        addi $3, $0, 1           ; set $3 to 1 for 4 mutiplied
+        mult $3, $8              ; use mutiplication as AND (non-negative and 4 mutiplied)
+        mflo $3                  ; load the AND result to $3
+
+w_end:  jr $31                   ; end the program, return
+;; CS230 - Assignment 5 - Question 1a
+;; Name:     Le Zhang
+;; Quest ID: l652zhan
+;; This program is a subroutine to processe an array and checks if each element by 
+;;   predicate function then produce the result array address and size
+;; Registers: $2 -> result,   the base address of filtered array
+;;            $3 -> result,   the length of of filtered array
+;;            $4 -> argument, predicate function address
+;;            $5 -> argument, the base address of original array
+;;            $6 -> argument, the length of original array
+;;            $8 -> temporary register for most memory read and write
+;;            $9 -> temporary register
+filter: 
+        addi $8, $0, 4     ; a constant 4 for bytes calculation
+        mult $8, $6        ; multiply item counter by 4 (byte size)
+        mflo $8            ; store the result in $8
+        add $8, $5, $8     ; calculate the first element address following original array
+        addi $30, $30, -4  ; move to next stack slot
+        sw $8, 0($30)      ; store the first element address following original array to stack
+        addi $30, $30, -4  ; move to next stack slot
+        sw $0, 0($30)      ; store the number of element of the result array to stack
+
+f_loop: beq $6, $0, end_f  ; if $6 equals 0, jump to end_f
+        addi $30, $30, -4  ; move to next stack slot
+        sw $8, 0($30)      ; store the current element address to stack
+
+        lw $8, 0($5)       ; read the current element in array
+        addi $5, $5, 4     ; move to next array element address
+        addi $6, $6, -1    ; decrement $6 by 1
+        addi $30, $30, -4  ; move to next stack slot
+        sw $8, 0($30)      ; store current array element to stack
+
+        add $9, $4, $0     ; copy the predicate function address to $9
+
+        addi $30, $30, -4  ; move to next stack slot
+        sw $4, 0($30)      ; store predicate function address to stack
+        addi $30, $30, -4  ; move to next stack slot
+        sw $5, 0($30)      ; store the first array element to stack
+        addi $30, $30, -4  ; move to next stack slot
+        sw $6, 0($30)      ; store the length of original array to stack
+
+        add $4, $8, $0     ; assign the current array element to argument $4
+        addi $30, $30, -4  ; move to next stack slot
+        sw $31, 0($30)     ; store pc
+        jalr $9            ; call predicate function
+        lw $31, 0($30)     ; restore pc
+        addi $30, $30, 4   ; release one stack slot 
+
+        lw $6, 0($30)      ; restore the length of original array from stack
+        addi $30, $30, 4   ; release one stack slot 
+        lw $5, 0($30)      ; restore the first array element from stack
+        addi $30, $30, 4   ; release one stack slot 
+        lw $4, 0($30)      ; restore predicate function address from stack
+        addi $30, $30, 4   ; release one stack slot 
+        lw $9, 0($30)      ; restore current array element from stack
+        addi $30, $30, 4   ; release one stack slot 
+        lw $8, 0($30)      ; restore the current element address from stack
+        addi $30, $30, 4   ; release one stack slot 
+
+        bne $3, $0, add_to ; if $3 is not 0, jump to add_to
+        beq $0, $0, f_loop ; back to f_loop
+
+add_to: sw $9, 0($8)       ; store current array element to current element address
+        addi $8, $8, 4     ; move to next array element
+        lw $9, 0($30)      ; restore number of element of the result array from stack
+        addi $9, $9, 1     ; increment 1 for the number of element of the result array
+        sw $9, 0($30)      ; store number of element of the result array to stack
+        beq $0, $0, f_loop ; back to f_loop
+
+end_f:  lw $3, 0($30)      ; restore the number of element of the result array from stack to $3
+        addi $30, $30, 4   ; release one stack slot 
+        lw $2, 0($30)      ; restore the first element address following original array from stack to $2
+        addi $30, $30, 4   ; release one stack slot 
+        jr $31             ; end the program, return
+
 """)
 
 binary_hex = hex_output(temp)
 
 
-print(binary_hex)
+print(temp)
